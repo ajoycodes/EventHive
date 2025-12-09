@@ -50,7 +50,7 @@
                     android:textColor="#7B7F8E"
                     android:textSize="12sp" />
 
-                <!-- Email -->
+
                 <EditText
                     android:id="@+id/emailInput"
                     android:layout_width="match_parent"
@@ -63,7 +63,7 @@
                     android:textColor="#151826"
                     android:textColorHint="#B0B3C0" />
 
-                <!-- Password -->
+
                 <EditText
                     android:id="@+id/passwordInput"
                     android:layout_width="match_parent"
@@ -76,7 +76,7 @@
                     android:textColor="#151826"
                     android:textColorHint="#B0B3C0" />
 
-                <!-- Login button -->
+
                 <Button
                     android:id="@+id/loginBtn"
                     android:layout_width="match_parent"
@@ -88,7 +88,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp" />
 
-                <!-- Divider text -->
+
                 <TextView
                     android:id="@+id/orText"
                     android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
                     android:textColor="#7B7F8E"
                     android:textSize="12sp" />
 
-                <!-- We’ll use this TextView as the “Go Register” clickable element -->
+
                 <TextView
                     android:id="@+id/goRegisterBtn"
                     android:layout_width="wrap_content"
