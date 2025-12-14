@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/brand_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="20dp"
+            android:background="@color/card_background">
+            
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/input_bg"
+                android:padding="10dp"/>
+                
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="About"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"/>
+                
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+            <View android:layout_width="40dp" android:layout_height="40dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:gravity="center">
+
+            <!-- App Icon -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/brand_primary"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="EH"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"/>
+            </androidx.cardview.widget.CardView>
+
+            <!-- App Name -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EventHive"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Version -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Version 1.0.0"
+                android:textSize="15sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="32dp"/>
+
+            <!-- Description -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="EventHive is your all-in-one event management platform. Discover events, purchase tickets, and manage your event experiences seamlessly."
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="32dp"/>
+
+            <!-- Info Cards -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_bg"
+                android:padding="20dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Developer"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EventHive Team"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_bg"
+                android:padding="20dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="support@eventhive.com"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brand_primary"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_bg"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="License"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MIT License"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

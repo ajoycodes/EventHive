@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/brand_background">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="24dp"
+        android:background="@color/card_background">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Admin Dashboard"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="System management"
+            android:textSize="15sp"
+            android:textColor="@color/text_secondary"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Management Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Management"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Manage Users -->
+            <LinearLayout
+                android:id="@+id/btnManageUsers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/card_bg"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_home"
+                    app:tint="@color/text_primary"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Manage Users"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="16dp"/>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_back"
+                    android:rotation="180"
+                    app:tint="@color/text_secondary"/>
+            </LinearLayout>
+
+            <!-- View Events -->
+            <LinearLayout
+                android:id="@+id/btnViewEvents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/card_bg"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@color/text_primary"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="View All Events"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="16dp"/>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_back"
+                    android:rotation="180"
+                    app:tint="@color/text_secondary"/>
+            </LinearLayout>
+
+            <!-- Settings -->
+            <LinearLayout
+                android:id="@+id/btnSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/card_bg"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:layout_marginBottom="24dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_settings"
+                    app:tint="@color/text_primary"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Settings"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="16dp"/>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_back"
+                    android:rotation="180"
+                    app:tint="@color/text_secondary"/>
+            </LinearLayout>
+
+            <!-- Sign Out Button -->
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Sign Out"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@drawable/btn_primary"
+                android:fontFamily="sans-serif-medium"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
