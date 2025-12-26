@@ -11,15 +11,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EventHive">
+        
         <activity
-            android:name=".activities.DashboardActivity"
+            android:name=".activities.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity android:name=".MainActivity" />
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.RegisterActivity" />
+        <activity android:name=".activities.UserDashboardActivity" />
+        <activity android:name=".activities.OrganizerDashboardActivity" />
+        <activity android:name=".activities.AdminDashboardActivity" />
+        <activity android:name=".activities.EventDetailsActivity" />
+        <activity android:name=".activities.EventListActivity" />
+        <activity android:name=".activities.CreateEventActivity" />
+        <activity android:name=".activities.EditEventActivity" />
+        <activity android:name=".activities.OrganizerEventsActivity" />
+        <activity android:name=".activities.MyTicketsActivity" />
+        <activity android:name=".activities.TicketConfirmationActivity" />
+        <activity android:name=".activities.ProfileActivity" />
+        <activity android:name=".activities.SettingsActivity" />
+        <activity android:name=".activities.AboutActivity" />
+        <activity android:name=".activities.HelpActivity" />
+        <activity android:name=".activities.AdminUserListActivity" />
+        
     </application>
 
 </manifest>
