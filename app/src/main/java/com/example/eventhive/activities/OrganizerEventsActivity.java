@@ -127,9 +127,21 @@ public class OrganizerEventsActivity extends AppCompatActivity {
 
                         String newStatus = statusOptions[pos];
                         if (!newStatus.equals(event.getStatus())) {
+                            String oldStatus = event.getStatus();
                             event.setStatus(newStatus);
                             boolean success = dbHelper.updateEvent(event);
                             if (success) {
+                                // Create notification for status change
+                                com.example.eventhive.utils.SessionManager session = new com.example.eventhive.utils.SessionManager(
+                                        OrganizerEventsActivity.this);
+                                int userId = session.getUserId();
+                                String notificationTitle = "Event Status Changed";
+                                String notificationMessage = "Event \"" + event.getTitle() +
+                                        "\" status changed from " + oldStatus + " to " + newStatus;
+                                com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
+                                        notificationTitle, notificationMessage, userId, event.getId());
+                                dbHelper.createNotification(notification);
+
                                 Toast.makeText(OrganizerEventsActivity.this,
                                         "Status updated to " + newStatus, Toast.LENGTH_SHORT).show();
                             }

@@ -224,6 +224,13 @@ public class EventDetailsActivity extends AppCompatActivity {
 
             boolean success = db.registerTicket(userId, eventId, uniqueCode, timestamp);
             if (success) {
+                // Create notification for successful ticket purchase
+                String notificationTitle = "Ticket Purchased";
+                String notificationMessage = "You successfully purchased a ticket for \"" + event.getTitle() + "\"";
+                com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
+                        notificationTitle, notificationMessage, userId, eventId);
+                db.createNotification(notification);
+
                 Intent intent = new Intent(EventDetailsActivity.this, TicketConfirmationActivity.class);
                 intent.putExtra("TICKET_CODE", uniqueCode);
                 startActivity(intent);

@@ -87,11 +87,13 @@
 
             <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
 
-            <!-- Calendar -->
+            <!-- Notifications -->
             <ImageView
+                android:id="@+id/navNotifications"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:src="@drawable/ic_calendar"
+                android:src="@drawable/ic_settings"
+                android:contentDescription="Notifications"
                 app:tint="@color/white"
                 android:alpha="0.6"/>
             

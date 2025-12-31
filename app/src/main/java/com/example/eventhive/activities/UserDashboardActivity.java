@@ -206,6 +206,15 @@ public class UserDashboardActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+
+        // Notification navigation
+        ImageView navNotifications = findViewById(R.id.navNotifications);
+        if (navNotifications != null) {
+            navNotifications.setOnClickListener(v -> {
+                Intent intent = new Intent(UserDashboardActivity.this, NotificationsActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     @Override

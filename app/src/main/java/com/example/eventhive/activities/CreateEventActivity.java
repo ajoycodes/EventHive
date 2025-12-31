@@ -260,6 +260,15 @@ public class CreateEventActivity extends AppCompatActivity {
         boolean success = dbHelper.createEvent(newEvent);
 
         if (success) {
+            // Create notification for successful event creation
+            SessionManager session = new SessionManager(this);
+            int userId = session.getUserId();
+            String notificationTitle = "Event Created";
+            String notificationMessage = "You successfully created the event \"" + title + "\"";
+            com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
+                    notificationTitle, notificationMessage, userId, 0); // 0 as event ID will be assigned by DB
+            dbHelper.createNotification(notification);
+
             Toast.makeText(this, "Event Created Successfully!", Toast.LENGTH_SHORT).show();
             finish(); // Go back to previous screen
         } else {

@@ -13,7 +13,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "EventHive.db";
-    private static final int DATABASE_VERSION = 4; // Incremented for new fields
+    private static final int DATABASE_VERSION = 5; // Incremented for notifications table
 
     // Users Table
     private static final String TABLE_USERS = "users";
@@ -48,6 +48,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COL_TICKET_EVENT_ID = "event_id";
     private static final String COL_TICKET_CODE = "unique_code";
     private static final String COL_TICKET_TIMESTAMP = "purchase_timestamp"; // New column
+
+    // Notifications Table (NEW)
+    private static final String TABLE_NOTIFICATIONS = "notifications";
+    private static final String COL_NOTIF_ID = "id";
+    private static final String COL_NOTIF_TITLE = "title";
+    private static final String COL_NOTIF_MESSAGE = "message";
+    private static final String COL_NOTIF_TIMESTAMP = "timestamp";
+    private static final String COL_NOTIF_IS_READ = "is_read";
+    private static final String COL_NOTIF_USER_ID = "user_id";
+    private static final String COL_NOTIF_RELATED_EVENT_ID = "related_event_id";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -87,6 +97,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_TICKET_CODE + " TEXT, " +
                 COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0)";
         db.execSQL(createTickets);
+
+        // Create notifications table
+        String createNotifications = "CREATE TABLE " + TABLE_NOTIFICATIONS + " (" +
+                COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_NOTIF_TITLE + " TEXT, " +
+                COL_NOTIF_MESSAGE + " TEXT, " +
+                COL_NOTIF_TIMESTAMP + " INTEGER, " +
+                COL_NOTIF_IS_READ + " INTEGER DEFAULT 0, " + // 0 = false, 1 = true
+                COL_NOTIF_USER_ID + " INTEGER, " +
+                COL_NOTIF_RELATED_EVENT_ID + " INTEGER DEFAULT 0)";
+        db.execSQL(createNotifications);
 
         // Pre-populate some events
         insertDummyEvents(db);
@@ -135,12 +156,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.execSQL(
                         "ALTER TABLE " + TABLE_TICKETS + " ADD COLUMN " + COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0");
             } catch (Exception e) {
-                android.util.Log.e("DatabaseHelper", "Error during migration: " + e.getMessage());
+                android.util.Log.e("DatabaseHelper", "Error during v3->v4 migration: " + e.getMessage());
                 // If migration fails, fall back to recreating tables (data loss)
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_TICKETS);
                 onCreate(db);
+                return;
+            }
+        }
+
+        // Handle upgrade from version 4 to 5
+        if (oldVersion < 5) {
+            // Create notifications table
+            try {
+                String createNotifications = "CREATE TABLE " + TABLE_NOTIFICATIONS + " (" +
+                        COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_NOTIF_TITLE + " TEXT, " +
+                        COL_NOTIF_MESSAGE + " TEXT, " +
+                        COL_NOTIF_TIMESTAMP + " INTEGER, " +
+                        COL_NOTIF_IS_READ + " INTEGER DEFAULT 0, " +
+                        COL_NOTIF_USER_ID + " INTEGER, " +
+                        COL_NOTIF_RELATED_EVENT_ID + " INTEGER DEFAULT 0)";
+                db.execSQL(createNotifications);
+            } catch (Exception e) {
+                android.util.Log.e("DatabaseHelper", "Error during v4->v5 migration: " + e.getMessage());
             }
         }
     }
@@ -367,5 +407,113 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return list;
+    }
+
+    // --- Notification Operations ---
+    /**
+     * Creates a new notification in the database.
+     * 
+     * @param notification The notification to create
+     * @return true if successful, false otherwise
+     */
+    public boolean createNotification(com.example.eventhive.models.Notification notification) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_NOTIF_TITLE, notification.getTitle());
+        values.put(COL_NOTIF_MESSAGE, notification.getMessage());
+        values.put(COL_NOTIF_TIMESTAMP, notification.getTimestamp());
+        values.put(COL_NOTIF_IS_READ, notification.isRead() ? 1 : 0);
+        values.put(COL_NOTIF_USER_ID, notification.getUserId());
+        values.put(COL_NOTIF_RELATED_EVENT_ID, notification.getRelatedEventId());
+
+        long result = db.insert(TABLE_NOTIFICATIONS, null, values);
+        return result != -1;
+    }
+
+    /**
+     * Gets all notifications for a specific user, sorted by newest first.
+     * 
+     * @param userId The user ID
+     * @return List of notifications
+     */
+    public List<com.example.eventhive.models.Notification> getNotificationsForUser(int userId) {
+        List<com.example.eventhive.models.Notification> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_NOTIFICATIONS +
+                " WHERE " + COL_NOTIF_USER_ID + " = ?" +
+                " ORDER BY " + COL_NOTIF_TIMESTAMP + " DESC"; // Newest first
+
+        Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOTIF_TITLE));
+                String message = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOTIF_MESSAGE));
+                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COL_NOTIF_TIMESTAMP));
+                boolean isRead = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_IS_READ)) == 1;
+                int notifUserId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_USER_ID));
+                int relatedEventId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_RELATED_EVENT_ID));
+
+                list.add(new com.example.eventhive.models.Notification(
+                        id, title, message, timestamp, isRead, notifUserId, relatedEventId));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    /**
+     * Marks a specific notification as read.
+     * 
+     * @param notificationId The notification ID
+     * @return true if successful, false otherwise
+     */
+    public boolean markNotificationAsRead(int notificationId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_NOTIF_IS_READ, 1); // 1 = true
+
+        int rows = db.update(TABLE_NOTIFICATIONS, values,
+                COL_NOTIF_ID + " = ?",
+                new String[] { String.valueOf(notificationId) });
+        return rows > 0;
+    }
+
+    /**
+     * Marks all notifications for a user as read.
+     * 
+     * @param userId The user ID
+     * @return true if successful, false otherwise
+     */
+    public boolean markAllNotificationsAsRead(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_NOTIF_IS_READ, 1);
+
+        int rows = db.update(TABLE_NOTIFICATIONS, values,
+                COL_NOTIF_USER_ID + " = ?",
+                new String[] { String.valueOf(userId) });
+        return rows > 0;
+    }
+
+    /**
+     * Gets the count of unread notifications for a user.
+     * 
+     * @param userId The user ID
+     * @return Count of unread notifications
+     */
+    public int getUnreadNotificationCount(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_NOTIFICATIONS +
+                " WHERE " + COL_NOTIF_USER_ID + " = ? AND " + COL_NOTIF_IS_READ + " = 0";
+
+        Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
     }
 }
