@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Apple-Style Secondary Button (Light Gray, Pill-Shaped) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#10B981"/>
-    <corners android:radius="16dp"/>
+    <solid android:color="@color/button_secondary_bg"/>
+    <corners android:radius="20dp"/>
 </shape>

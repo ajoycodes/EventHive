@@ -1,23 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
-    <!-- Brand Colors -->
-    <color name="brand_primary">#6366F1</color>
-    <color name="brand_background">#EFF3F6</color>
+    <!-- Apple-Inspired Color System -->
+    
+    <!-- Backgrounds -->
+    <color name="brand_background">#FFFFFF</color> <!-- Pure white primary -->
+    <color name="secondary_background">#F7F7F9</color> <!-- Sections/lists -->
+    <color name="card_background">#FFFFFF</color> <!-- Card white -->
+    <color name="search_background">#F2F2F7</color> <!-- Search bar -->
     
     <!-- Text Colors -->
-    <color name="text_primary">#111827</color>
-    <color name="text_secondary">#6B7280</color>
+    <color name="text_primary">#1C1C1E</color> <!-- Titles, main content -->
+    <color name="text_secondary">#6E6E73</color> <!-- Location, date, meta -->
+    <color name="text_tertiary">#A1A1A6</color> <!-- Timestamps, hints -->
+    <color name="text_placeholder">#8E8E93</color> <!-- Placeholders -->
     
-    <!-- UI Colors -->
-    <color name="border_color">#E5E7EB</color>
-    <color name="card_background">#FFFFFF</color>
-    <color name="card_icon_bg">#6366F1</color>
-    <color name="card_green_bg">#10B981</color>
+    <!-- Accent Color (Single Unified Brand Color) -->
+    <color name="brand_primary">#007AFF</color> <!-- iOS Blue - ONLY accent -->
+    <color name="accent">#007AFF</color> <!-- Alias for consistency -->
     
-    <!-- Status Colors -->
-    <color name="success">#10B981</color>
-    <color name="destructive">#EF4444</color>
+    <!-- Status Colors (Subtle indicators only) -->
+    <color name="status_active">#34C759</color> <!-- Green for active events -->
+    <color name="status_hold">#FF9F0A</color> <!-- Orange for on-hold -->
+    <color name="status_cancelled">#FF3B30</color> <!-- Red for cancelled -->
+    <color name="success">#34C759</color> <!-- Success states -->
+    <color name="destructive">#FF3B30</color> <!-- Destructive actions -->
+    
+    <!-- Buttons -->
+    <color name="button_primary_bg">#007AFF</color>
+    <color name="button_primary_text">#FFFFFF</color>
+    <color name="button_secondary_bg">#F2F2F7</color>
+    <color name="button_secondary_text">#007AFF</color>
+    
+    <!-- Dividers & Borders -->
+    <color name="divider">#E5E5EA</color>
+    <color name="border_color">#D1D1D6</color>
+    
+    <!-- Bottom Navigation -->
+    <color name="nav_background">#FFFFFF</color>
+    <color name="nav_active">#007AFF</color>
+    <color name="nav_inactive">#8E8E93</color>
+    
+    <!-- Input Fields -->
+    <color name="input_bg">#F2F2F7</color>
+    <color name="input_text">#1C1C1E</color>
+    
+    <!-- Legacy/Compatibility (mapped to new system) -->
+    <color name="card_icon_bg">#007AFF</color>
+    <color name="card_green_bg">#34C759</color>
 </resources>

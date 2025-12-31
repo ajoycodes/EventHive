@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/brand_background">
+    android:background="@color/secondary_background">
 
     <!-- Header -->
     <LinearLayout
@@ -11,21 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="48dp"
-        android:paddingBottom="20dp"
+        android:paddingHorizontal="@dimen/spacing_l"
+        android:paddingTop="@dimen/status_bar_padding"
+        android:paddingBottom="@dimen/spacing_l"
         android:gravity="center_vertical"
-        android:background="@color/card_background">
+        android:background="@color/white">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Events"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:fontFamily="sans-serif-medium"/>
+            style="@style/TextAppearance.Display"
+            android:textColor="@color/text_primary"/>
 
         <ImageView
             android:layout_width="40dp"
@@ -52,61 +50,62 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="20dp"
-        app:cardCornerRadius="24dp"
-        app:cardBackgroundColor="@color/card_icon_bg"
-        app:cardElevation="0dp">
+        android:layout_margin="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/corner_xlarge"
+        app:cardBackgroundColor="@color/nav_background"
+        app:cardElevation="@dimen/elevation_small">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/bottom_nav_height"
             android:orientation="horizontal"
-            android:paddingVertical="16dp"
-            android:paddingHorizontal="32dp"
+            android:paddingVertical="@dimen/bottom_nav_padding_vertical"
+            android:paddingHorizontal="@dimen/bottom_nav_padding_horizontal"
             android:gravity="center">
 
-            <!-- Home -->
+            <!-- Home (Active) -->
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/bottom_nav_icon_size"
+                android:layout_height="@dimen/bottom_nav_icon_size"
                 android:src="@drawable/ic_home"
                 android:background="@drawable/round_white_bg"
-                android:padding="6dp"/>
+                android:padding="6dp"
+                app:tint="@color/nav_active"/>
                 
             <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
             
             <!-- Tickets -->
             <ImageView
                 android:id="@+id/navTicket"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/bottom_nav_icon_size"
+                android:layout_height="@dimen/bottom_nav_icon_size"
                 android:src="@drawable/ic_calendar" 
                 android:contentDescription="My Tickets"
-                app:tint="@color/white"
-                android:alpha="0.6"/>
+                app:tint="@color/nav_inactive"
+                android:alpha="1.0"/>
 
             <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
 
             <!-- Notifications -->
             <ImageView
                 android:id="@+id/navNotifications"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_settings"
+                android:layout_width="@dimen/bottom_nav_icon_size"
+                android:layout_height="@dimen/bottom_nav_icon_size"
+                android:src="@drawable/ic_notifications"
                 android:contentDescription="Notifications"
-                app:tint="@color/white"
-                android:alpha="0.6"/>
+                app:tint="@color/nav_inactive"
+                android:alpha="1.0"/>
             
             <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
 
-            <!-- Settings/Logout -->
+            <!-- Profile/Settings -->
             <ImageView
                 android:id="@+id/navLogout"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/bottom_nav_icon_size"
+                android:layout_height="@dimen/bottom_nav_icon_size"
                 android:src="@drawable/ic_settings"
-                app:tint="@color/white"
-                android:alpha="0.6"/>
+                app:tint="@color/nav_inactive"
+                android:alpha="1.0"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

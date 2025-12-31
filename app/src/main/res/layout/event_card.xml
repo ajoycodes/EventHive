@@ -4,10 +4,10 @@
     android:id="@+id/cardInfo"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="20dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
+    android:layout_marginHorizontal="@dimen/spacing_l"
+    android:layout_marginVertical="@dimen/spacing_s"
+    app:cardCornerRadius="@dimen/corner_medium"
+    app:cardElevation="@dimen/elevation_none"
     app:cardBackgroundColor="@color/card_background"
     android:clickable="true"
     android:focusable="true"
@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="@dimen/spacing_m">
 
         <!-- Date Circle -->
         <androidx.cardview.widget.CardView
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="@dimen/spacing_m">
 
             <!-- Venue/Title -->
             <TextView

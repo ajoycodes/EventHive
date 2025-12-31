@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base App Theme -->
+    <style name="AppTheme" parent="Theme.EventHive">
+        <!-- All theme colors inherited from Theme.EventHive -->
+    </style>
+
+    <!-- Typography Styles -->
+    <style name="TextAppearance.Display" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Title" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Headline" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Body" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.BodySmall" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Caption" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Label" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- Card Styles -->
+    <style name="Card" parent="">
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardCornerRadius">@dimen/corner_medium</item>
+        <item name="cardElevation">@dimen/elevation_none</item>
+        <item name="contentPadding">@dimen/spacing_m</item>
+    </style>
+
+    <style name="Card.Elevated">
+        <item name="cardElevation">@dimen/elevation_small</item>
+    </style>
+
+    <style name="Card.Large">
+        <item name="cardCornerRadius">@dimen/corner_large</item>
+        <item name="contentPadding">@dimen/spacing_l</item>
+    </style>
+
+    <!-- Button Styles -->
+    <!-- Apple-Style Primary Button (iOS Blue) -->
+    <style name="Button.Primary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/btn_primary</item>
+        <item name="android:textColor">@color/button_primary_text</item>
+        <item name="android:textSize">@dimen/text_body_large</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:paddingStart">@dimen/spacing_xl</item>
+        <item name="android:paddingEnd">@dimen/spacing_xl</item>
+    </style>
+
+    <!-- Apple-Style Secondary Button (Light Gray) -->
+    <style name="Button.Secondary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/btn_secondary</item>
+        <item name="android:textColor">@color/button_secondary_text</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">@dimen/button_height_small</item>
+    </style>
+
+    <!-- Apple-Style Destructive Button (Red) -->
+    <style name="Button.Destructive" parent="Button.Primary">
+        <item name="android:background">@drawable/btn_destructive</item>
+    </style>
+
+    <!-- Input Styles -->
+    <style name="Input" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/input_selector</item>
+        <item name="android:paddingStart">@dimen/spacing_m</item>
+        <item name="android:paddingEnd">@dimen/spacing_m</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/input_text</item>
+        <item name="android:textColorHint">@color/text_placeholder</item>
+        <item name="android:minHeight">@dimen/input_height</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
+    </style>
+
+    <!-- Apple-Style Input Field (Reusable Component) -->
+    <style name="AppleInput" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/input_selector</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/input_text</item>
+        <item name="android:textColorHint">@color/text_placeholder</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <!-- Apple-Style Search Field -->
+    <style name="AppleSearchField" parent="AppleInput">
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:hint">Search events...</item>
+    </style>
+
+    <!-- Apple-Style Multiline Input -->
+    <style name="AppleInputMultiline" parent="AppleInput">
+        <item name="android:gravity">top|start</item>
+        <item name="android:minHeight">120dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <!-- Icon Styles -->
+    <style name="Icon">
+        <item name="android:layout_width">@dimen/icon_size</item>
+        <item name="android:layout_height">@dimen/icon_size</item>
+        <item name="tint">@color/text_secondary</item>
+    </style>
+
+    <style name="Icon.Large">
+        <item name="android:layout_width">@dimen/icon_size_large</item>
+        <item name="android:layout_height">@dimen/icon_size_large</item>
+    </style>
+
+    <style name="Icon.Primary">
+        <item name="tint">@color/brand_primary</item>
+    </style>
+</resources>

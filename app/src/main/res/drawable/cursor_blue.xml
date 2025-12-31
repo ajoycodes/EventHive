@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Blue cursor for Apple-style inputs -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
+    android:shape="rectangle">
+    <size android:width="2dp"/>
     <solid android:color="@color/brand_primary"/>
 </shape>

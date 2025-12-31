@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Apple-Style Primary Button (iOS Blue, Pill-Shaped) -->
+<!-- Apple-Style Destructive Button (Red, Pill-Shaped) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/button_primary_bg"/>
+    <solid android:color="@color/destructive"/>
     <corners android:radius="20dp"/>
 </shape>

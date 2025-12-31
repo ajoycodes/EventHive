@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.eventhive.R;
 import com.example.eventhive.adapters.EventAdapter;
 import com.example.eventhive.utils.SessionManager;
-import com.example.eventhive.viewmodel.EventViewModel;
 
 public class UserDashboardActivity extends AppCompatActivity {
 
