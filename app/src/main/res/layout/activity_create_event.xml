@@ -88,7 +88,6 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="16dp"/>
 
-
             <!-- Location Input -->
             <EditText
                 android:id="@+id/etLocation"
@@ -103,7 +102,53 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="16dp"/>
 
-            <!-- Event Image Upload -->
+            <!-- Ticket Price Input -->
+            <EditText
+                android:id="@+id/etTicketPrice"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:hint="Ticket Price (e.g., 500.00)"
+                android:inputType="numberDecimal"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Ticket Quantity Input -->
+            <EditText
+                android:id="@+id/etTicketQuantity"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:hint="Ticket Quantity (e.g., 100)"
+                android:inputType="number"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Event Type Selector -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Event Type"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerEventType"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/input_bg"
+                android:paddingHorizontal="16dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Cover Image Upload -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -161,6 +206,42 @@
                 </RelativeLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <!-- Gallery Images Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gallery Images (Optional)"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btnAddGalleryImages"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="+ Add Gallery Images"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:textColor="@color/brand_primary"
+                android:background="@drawable/input_bg"
+                android:layout_marginBottom="12dp"/>
+
+            <HorizontalScrollView
+                android:id="@+id/galleryScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:id="@+id/galleryImagesContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp"/>
+            </HorizontalScrollView>
 
             <!-- Description Input -->
             <EditText

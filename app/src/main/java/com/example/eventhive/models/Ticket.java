@@ -5,6 +5,7 @@ public class Ticket {
     private int userId;
     private int eventId;
     private String uniqueCode;
+    private long purchaseTimestamp; // Timestamp when ticket was purchased
 
     // Joined Data
     private String eventTitle;
@@ -17,6 +18,20 @@ public class Ticket {
         this.userId = userId;
         this.eventId = eventId;
         this.uniqueCode = uniqueCode;
+        this.eventTitle = eventTitle;
+        this.eventDate = eventDate;
+        this.eventLocation = eventLocation;
+        this.purchaseTimestamp = 0; // Default for existing tickets
+    }
+
+    // Constructor with timestamp
+    public Ticket(int id, int userId, int eventId, String uniqueCode, long purchaseTimestamp,
+            String eventTitle, String eventDate, String eventLocation) {
+        this.id = id;
+        this.userId = userId;
+        this.eventId = eventId;
+        this.uniqueCode = uniqueCode;
+        this.purchaseTimestamp = purchaseTimestamp;
         this.eventTitle = eventTitle;
         this.eventDate = eventDate;
         this.eventLocation = eventLocation;
@@ -48,5 +63,9 @@ public class Ticket {
 
     public String getEventLocation() {
         return eventLocation;
+    }
+
+    public long getPurchaseTimestamp() {
+        return purchaseTimestamp;
     }
 }

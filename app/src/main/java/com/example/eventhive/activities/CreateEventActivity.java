@@ -4,28 +4,45 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import com.example.eventhive.R;
 import com.example.eventhive.databases.DatabaseHelper;
 import com.example.eventhive.models.Event;
+import com.example.eventhive.utils.ImageStorageHelper;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateEventActivity extends AppCompatActivity {
 
-    private EditText etTitle, etDate, etLocation, etDescription;
-    private Button btnCreate;
+    private EditText etTitle, etDate, etLocation, etDescription, etTicketPrice, etTicketQuantity;
+    private Button btnCreate, btnAddGalleryImages;
     private ImageView ivEventImage;
-    private LinearLayout uploadPlaceholder;
+    private LinearLayout uploadPlaceholder, galleryImagesContainer;
+    private HorizontalScrollView galleryScrollView;
+    private Spinner spinnerEventType;
     private DatabaseHelper dbHelper;
-    private Uri selectedImageUri;
 
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    // Image URIs
+    private Uri selectedCoverImageUri;
+    private List<Uri> galleryImageUris = new ArrayList<>();
+
+    // Image paths after saving to internal storage
+    private String coverImagePath = "";
+    private List<String> galleryImagePaths = new ArrayList<>();
+
+    private ActivityResultLauncher<Intent> coverImagePickerLauncher;
+    private ActivityResultLauncher<Intent> galleryImagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,67 +51,217 @@ public class CreateEventActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        // Initialize views
         etTitle = findViewById(R.id.etTitle);
         etDate = findViewById(R.id.etDate);
         etLocation = findViewById(R.id.etLocation);
         etDescription = findViewById(R.id.etDescription);
+        etTicketPrice = findViewById(R.id.etTicketPrice);
+        etTicketQuantity = findViewById(R.id.etTicketQuantity);
         btnCreate = findViewById(R.id.btnCreate);
+        btnAddGalleryImages = findViewById(R.id.btnAddGalleryImages);
         ivEventImage = findViewById(R.id.ivEventImage);
         uploadPlaceholder = findViewById(R.id.uploadPlaceholder);
+        galleryImagesContainer = findViewById(R.id.galleryImagesContainer);
+        galleryScrollView = findViewById(R.id.galleryScrollView);
+        spinnerEventType = findViewById(R.id.spinnerEventType);
 
-        android.widget.ImageView btnBack = findViewById(R.id.btnBack);
+        ImageView btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        // Initialize image picker
-        imagePickerLauncher = registerForActivityResult(
+        // Setup event type spinner
+        setupEventTypeSpinner();
+
+        // Initialize cover image picker
+        coverImagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        selectedImageUri = result.getData().getData();
-                        if (selectedImageUri != null) {
-                            ivEventImage.setImageURI(selectedImageUri);
+                        selectedCoverImageUri = result.getData().getData();
+                        if (selectedCoverImageUri != null) {
+                            ivEventImage.setImageURI(selectedCoverImageUri);
                             ivEventImage.setVisibility(View.VISIBLE);
                             uploadPlaceholder.setVisibility(View.GONE);
                         }
                     }
                 });
 
-        uploadPlaceholder.setOnClickListener(v -> openImagePicker());
-        ivEventImage.setOnClickListener(v -> openImagePicker());
+        // Initialize gallery image picker (multiple selection)
+        galleryImagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        if (result.getData().getClipData() != null) {
+                            // Multiple images selected
+                            int count = result.getData().getClipData().getItemCount();
+                            for (int i = 0; i < count && i < 10; i++) { // Limit to 10 images
+                                Uri imageUri = result.getData().getClipData().getItemAt(i).getUri();
+                                galleryImageUris.add(imageUri);
+                            }
+                        } else if (result.getData().getData() != null) {
+                            // Single image selected
+                            galleryImageUris.add(result.getData().getData());
+                        }
+                        displayGalleryImages();
+                    }
+                });
 
+        uploadPlaceholder.setOnClickListener(v -> openCoverImagePicker());
+        ivEventImage.setOnClickListener(v -> openCoverImagePicker());
+        btnAddGalleryImages.setOnClickListener(v -> openGalleryImagePicker());
         btnCreate.setOnClickListener(v -> saveEvent());
     }
 
-    private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        imagePickerLauncher.launch(intent);
+    private void setupEventTypeSpinner() {
+        // Event type options
+        String[] eventTypes = { "Concert", "Seminar", "Festival", "Workshop", "Sports", "Conference", "Other" };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, eventTypes);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerEventType.setAdapter(adapter);
     }
 
-    private void saveEvent() {
-        String title = etTitle.getText().toString();
-        String date = etDate.getText().toString();
-        String loc = etLocation.getText().toString();
-        String desc = etDescription.getText().toString();
+    private void openCoverImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        coverImagePickerLauncher.launch(intent);
+    }
 
-        if (title.isEmpty() || date.isEmpty() || loc.isEmpty()) {
-            Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
+    private void openGalleryImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Allow multiple selection
+        galleryImagePickerLauncher.launch(intent);
+    }
+
+    private void displayGalleryImages() {
+        galleryImagesContainer.removeAllViews(); // Clear existing views
+
+        if (galleryImageUris.isEmpty()) {
+            galleryScrollView.setVisibility(View.GONE);
             return;
         }
 
-        // Store image URI as string (in real app, you'd upload to server or save
-        // locally)
-        String imageUriString = selectedImageUri != null ? selectedImageUri.toString() : "";
+        galleryScrollView.setVisibility(View.VISIBLE);
 
-        // Using 0 as placeholder image ID (you could store URI in Event model)
-        Event newEvent = new Event(title, date, loc, desc, 0);
+        for (int i = 0; i < galleryImageUris.size(); i++) {
+            final int index = i;
+            Uri uri = galleryImageUris.get(i);
+
+            // Create a card for each gallery image
+            CardView cardView = new CardView(this);
+            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                    200, // width in dp (will be converted to px)
+                    200 // height in dp
+            );
+            cardParams.setMargins(8, 0, 8, 0);
+            cardView.setLayoutParams(cardParams);
+            cardView.setRadius(12f);
+
+            // Create image view
+            ImageView imageView = new ImageView(this);
+            imageView.setLayoutParams(new CardView.LayoutParams(
+                    CardView.LayoutParams.MATCH_PARENT,
+                    CardView.LayoutParams.MATCH_PARENT));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setImageURI(uri);
+
+            // Add click listener to remove image
+            imageView.setOnClickListener(v -> {
+                galleryImageUris.remove(index);
+                displayGalleryImages(); // Refresh display
+                Toast.makeText(this, "Image removed", Toast.LENGTH_SHORT).show();
+            });
+
+            cardView.addView(imageView);
+            galleryImagesContainer.addView(cardView);
+        }
+    }
+
+    private void saveEvent() {
+        // Get input values
+        String title = etTitle.getText().toString().trim();
+        String date = etDate.getText().toString().trim();
+        String location = etLocation.getText().toString().trim();
+        String description = etDescription.getText().toString().trim();
+        String priceString = etTicketPrice.getText().toString().trim();
+        String quantityString = etTicketQuantity.getText().toString().trim();
+        String eventType = spinnerEventType.getSelectedItem().toString();
+
+        // Validation
+        if (title.isEmpty() || date.isEmpty() || location.isEmpty()) {
+            Toast.makeText(this, "Please fill in all required fields (Title, Date, Location)",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (priceString.isEmpty()) {
+            Toast.makeText(this, "Please enter ticket price", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (quantityString.isEmpty()) {
+            Toast.makeText(this, "Please enter ticket quantity", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double ticketPrice;
+        int ticketQuantity;
+        try {
+            ticketPrice = Double.parseDouble(priceString);
+            if (ticketPrice < 0) {
+                Toast.makeText(this, "Ticket price must be positive", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid ticket price format", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            ticketQuantity = Integer.parseInt(quantityString);
+            if (ticketQuantity <= 0) {
+                Toast.makeText(this, "Ticket quantity must be greater than 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid ticket quantity format", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save cover image to internal storage
+        if (selectedCoverImageUri != null) {
+            coverImagePath = ImageStorageHelper.saveImageToInternalStorage(this, selectedCoverImageUri);
+            if (coverImagePath == null) {
+                Toast.makeText(this, "Failed to save cover image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Save gallery images to internal storage
+        galleryImagePaths.clear();
+        for (Uri uri : galleryImageUris) {
+            String path = ImageStorageHelper.saveImageToInternalStorage(this, uri);
+            if (path != null) {
+                galleryImagePaths.add(path);
+            }
+        }
+
+        // Convert gallery paths list to comma-separated string
+        String galleryPathsString = String.join(",", galleryImagePaths);
+
+        // Create Event object with all fields
+        Event newEvent = new Event(title, date, location, description,
+                Event.STATUS_ACTIVE, ticketPrice, ticketQuantity,
+                coverImagePath, galleryPathsString, eventType);
+
         boolean success = dbHelper.createEvent(newEvent);
 
         if (success) {
-            Toast.makeText(this, "Event Created!", Toast.LENGTH_SHORT).show();
-            finish(); // Go back to Dashboard
+            Toast.makeText(this, "Event Created Successfully!", Toast.LENGTH_SHORT).show();
+            finish(); // Go back to previous screen
         } else {
             Toast.makeText(this, "Failed to create event", Toast.LENGTH_SHORT).show();
         }

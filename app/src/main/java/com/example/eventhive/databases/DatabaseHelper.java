@@ -13,7 +13,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "EventHive.db";
-    private static final int DATABASE_VERSION = 3; // Incremented for new Schema
+    private static final int DATABASE_VERSION = 4; // Incremented for new fields
 
     // Users Table
     private static final String TABLE_USERS = "users";
@@ -32,15 +32,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COL_EVENT_DATE = "date";
     private static final String COL_EVENT_LOCATION = "location";
     private static final String COL_EVENT_DESC = "description";
-    private static final String COL_EVENT_IMAGE = "image_res_id"; // Storing resource ID for simplicity in demo
+    private static final String COL_EVENT_IMAGE = "image_res_id"; // Legacy field
     private static final String COL_EVENT_STATUS = "status"; // Active, Hold, Cancelled
+    // New event columns
+    private static final String COL_EVENT_TICKET_PRICE = "ticket_price";
+    private static final String COL_EVENT_TICKET_QUANTITY = "ticket_quantity";
+    private static final String COL_EVENT_COVER_IMAGE_PATH = "cover_image_path";
+    private static final String COL_EVENT_GALLERY_PATHS = "gallery_image_paths";
+    private static final String COL_EVENT_TYPE = "event_type";
 
     // Tickets Table
     private static final String TABLE_TICKETS = "tickets";
     private static final String COL_TICKET_ID = "id";
     private static final String COL_TICKET_USER_ID = "user_id";
     private static final String COL_TICKET_EVENT_ID = "event_id";
-    private static final String COL_TICKET_CODE = "unique_code"; // New Column
+    private static final String COL_TICKET_CODE = "unique_code";
+    private static final String COL_TICKET_TIMESTAMP = "purchase_timestamp"; // New column
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -65,14 +72,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_EVENT_LOCATION + " TEXT, " +
                 COL_EVENT_DESC + " TEXT, " +
                 COL_EVENT_IMAGE + " INTEGER, " +
-                COL_EVENT_STATUS + " TEXT DEFAULT 'Active')";
+                COL_EVENT_STATUS + " TEXT DEFAULT 'Active', " +
+                COL_EVENT_TICKET_PRICE + " REAL DEFAULT 0.0, " +
+                COL_EVENT_TICKET_QUANTITY + " INTEGER DEFAULT 0, " +
+                COL_EVENT_COVER_IMAGE_PATH + " TEXT, " +
+                COL_EVENT_GALLERY_PATHS + " TEXT, " +
+                COL_EVENT_TYPE + " TEXT DEFAULT 'Other')";
         db.execSQL(createEvents);
 
         String createTickets = "CREATE TABLE " + TABLE_TICKETS + " (" +
                 COL_TICKET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_TICKET_USER_ID + " INTEGER, " +
                 COL_TICKET_EVENT_ID + " INTEGER, " +
-                COL_TICKET_CODE + " TEXT)";
+                COL_TICKET_CODE + " TEXT, " +
+                COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0)";
         db.execSQL(createTickets);
 
         // Pre-populate some events
@@ -106,10 +119,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TICKETS);
-        onCreate(db);
+        // Handle upgrade from version 3 to 4
+        if (oldVersion < 4) {
+            // Add new columns to events table
+            try {
+                db.execSQL(
+                        "ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_TICKET_PRICE + " REAL DEFAULT 0.0");
+                db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_TICKET_QUANTITY
+                        + " INTEGER DEFAULT 0");
+                db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_COVER_IMAGE_PATH + " TEXT");
+                db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_GALLERY_PATHS + " TEXT");
+                db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_TYPE + " TEXT DEFAULT 'Other'");
+
+                // Add new column to tickets table
+                db.execSQL(
+                        "ALTER TABLE " + TABLE_TICKETS + " ADD COLUMN " + COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0");
+            } catch (Exception e) {
+                android.util.Log.e("DatabaseHelper", "Error during migration: " + e.getMessage());
+                // If migration fails, fall back to recreating tables (data loss)
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_TICKETS);
+                onCreate(db);
+            }
+        }
     }
 
     // --- User Operations ---
@@ -181,8 +214,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_EVENT_DATE, event.getDate());
         values.put(COL_EVENT_LOCATION, event.getLocation());
         values.put(COL_EVENT_DESC, event.getDescription());
-        values.put(COL_EVENT_IMAGE, 0); // Placeholder
+        values.put(COL_EVENT_IMAGE, 0); // Legacy placeholder
         values.put(COL_EVENT_STATUS, event.getStatus());
+        // New fields
+        values.put(COL_EVENT_TICKET_PRICE, event.getTicketPrice());
+        values.put(COL_EVENT_TICKET_QUANTITY, event.getTicketQuantity());
+        values.put(COL_EVENT_COVER_IMAGE_PATH, event.getCoverImagePath());
+        values.put(COL_EVENT_GALLERY_PATHS, event.getGalleryImagePaths());
+        values.put(COL_EVENT_TYPE, event.getEventType());
         long res = db.insert(TABLE_EVENTS, null, values);
         return res != -1;
     }
@@ -195,6 +234,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_EVENT_LOCATION, event.getLocation());
         values.put(COL_EVENT_DESC, event.getDescription());
         values.put(COL_EVENT_STATUS, event.getStatus());
+        // Update new fields if needed
+        values.put(COL_EVENT_TICKET_PRICE, event.getTicketPrice());
+        values.put(COL_EVENT_TICKET_QUANTITY, event.getTicketQuantity());
+        values.put(COL_EVENT_COVER_IMAGE_PATH, event.getCoverImagePath());
+        values.put(COL_EVENT_GALLERY_PATHS, event.getGalleryImagePaths());
+        values.put(COL_EVENT_TYPE, event.getEventType());
         int rows = db.update(TABLE_EVENTS, values, COL_EVENT_ID + "=?", new String[] { String.valueOf(event.getId()) });
         return rows > 0;
     }
@@ -211,34 +256,78 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
+                // Read basic fields
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_EVENT_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_TITLE));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DATE));
+                String location = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_LOCATION));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DESC));
+
+                // Read status
                 String status = "Active"; // Default
                 int statusIndex = cursor.getColumnIndex(COL_EVENT_STATUS);
-                if (statusIndex != -1) {
+                if (statusIndex != -1 && cursor.getString(statusIndex) != null) {
                     status = cursor.getString(statusIndex);
                 }
 
-                Event event = new Event(
-                        cursor.getInt(cursor.getColumnIndexOrThrow(COL_EVENT_ID)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_TITLE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DATE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_LOCATION)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DESC)),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(COL_EVENT_IMAGE)),
-                        status);
+                // Read new fields with safe column index checking
+                double ticketPrice = 0.0;
+                int priceIndex = cursor.getColumnIndex(COL_EVENT_TICKET_PRICE);
+                if (priceIndex != -1) {
+                    ticketPrice = cursor.getDouble(priceIndex);
+                }
+
+                int ticketQuantity = 0;
+                int quantityIndex = cursor.getColumnIndex(COL_EVENT_TICKET_QUANTITY);
+                if (quantityIndex != -1) {
+                    ticketQuantity = cursor.getInt(quantityIndex);
+                }
+
+                String coverImagePath = "";
+                int coverPathIndex = cursor.getColumnIndex(COL_EVENT_COVER_IMAGE_PATH);
+                if (coverPathIndex != -1) {
+                    coverImagePath = cursor.getString(coverPathIndex);
+                    if (coverImagePath == null)
+                        coverImagePath = "";
+                }
+
+                String galleryPaths = "";
+                int galleryIndex = cursor.getColumnIndex(COL_EVENT_GALLERY_PATHS);
+                if (galleryIndex != -1) {
+                    galleryPaths = cursor.getString(galleryIndex);
+                    if (galleryPaths == null)
+                        galleryPaths = "";
+                }
+
+                String eventType = "Other";
+                int typeIndex = cursor.getColumnIndex(COL_EVENT_TYPE);
+                if (typeIndex != -1 && cursor.getString(typeIndex) != null) {
+                    eventType = cursor.getString(typeIndex);
+                }
+
+                // Create event with comprehensive constructor
+                Event event = new Event(id, title, date, location, description,
+                        status, ticketPrice, ticketQuantity,
+                        coverImagePath, galleryPaths, eventType);
                 eventList.add(event);
             } while (cursor.moveToNext());
         }
         cursor.close();
         return eventList;
+    } // --- Ticket Operations ---
+
+    public boolean registerTicket(int userId, int eventId, String uniqueCode) {
+        return registerTicket(userId, eventId, uniqueCode, System.currentTimeMillis());
     }
 
-    // --- Ticket Operations ---
-    public boolean registerTicket(int userId, int eventId, String uniqueCode) {
+    // Overloaded method with timestamp
+    public boolean registerTicket(int userId, int eventId, String uniqueCode, long timestamp) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_TICKET_USER_ID, userId);
         values.put(COL_TICKET_EVENT_ID, eventId);
         values.put(COL_TICKET_CODE, uniqueCode);
+        values.put(COL_TICKET_TIMESTAMP, timestamp);
         long res = db.insert(TABLE_TICKETS, null, values);
         return res != -1;
     }
@@ -247,23 +336,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<com.example.eventhive.models.Ticket> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT t." + COL_TICKET_ID + ", t." + COL_TICKET_USER_ID + ", t." + COL_TICKET_EVENT_ID + ", t."
-                + COL_TICKET_CODE +
+                + COL_TICKET_CODE + ", t." + COL_TICKET_TIMESTAMP +
                 ", e." + COL_EVENT_TITLE + ", e." + COL_EVENT_DATE + ", e." + COL_EVENT_LOCATION +
                 " FROM " + TABLE_TICKETS + " t " +
                 "JOIN " + TABLE_EVENTS + " e ON t." + COL_TICKET_EVENT_ID + " = e." + COL_EVENT_ID +
-                " WHERE t." + COL_TICKET_USER_ID + " = ?";
+                " WHERE t." + COL_TICKET_USER_ID + " = ?" +
+                " ORDER BY t." + COL_TICKET_TIMESTAMP + " DESC"; // Sort by newest first
 
         Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
         if (cursor.moveToFirst()) {
             do {
+                // Read timestamp with safe column checking
+                long timestamp = 0;
+                int timestampIndex = cursor.getColumnIndex(COL_TICKET_TIMESTAMP);
+                if (timestampIndex != -1) {
+                    timestamp = cursor.getLong(timestampIndex);
+                }
+
                 list.add(new com.example.eventhive.models.Ticket(
                         cursor.getInt(0), // ticket id
                         cursor.getInt(1), // user id
                         cursor.getInt(2), // event id
                         cursor.getString(3), // code
-                        cursor.getString(4), // title
-                        cursor.getString(5), // date
-                        cursor.getString(6) // location
+                        timestamp, // timestamp
+                        cursor.getString(5), // title (index 4 is timestamp, so event data starts at 5)
+                        cursor.getString(6), // date
+                        cursor.getString(7) // location
                 ));
             } while (cursor.moveToNext());
         }
