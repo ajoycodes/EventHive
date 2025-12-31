@@ -87,7 +87,8 @@ public class LoginActivity extends AppCompatActivity {
 
             // Save Session
             com.example.eventhive.utils.SessionManager session = new com.example.eventhive.utils.SessionManager(this);
-            session.createLoginSession(user.getId(), user.getFirstName(), user.getEmail(), user.getRole());
+            session.createLoginSession(user.getId(), user.getFirstName(), user.getEmail(), user.getRole(),
+                    user.getPhone());
 
             Toast.makeText(this, "Welcome " + user.getFirstName(), Toast.LENGTH_SHORT).show();
             navigateToDashboard(user.getRole());

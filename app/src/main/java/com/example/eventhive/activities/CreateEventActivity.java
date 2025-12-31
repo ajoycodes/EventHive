@@ -20,6 +20,7 @@ import com.example.eventhive.R;
 import com.example.eventhive.databases.DatabaseHelper;
 import com.example.eventhive.models.Event;
 import com.example.eventhive.utils.ImageStorageHelper;
+import com.example.eventhive.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
 

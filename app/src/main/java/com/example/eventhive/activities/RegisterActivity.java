@@ -146,7 +146,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Create user
         User newUser = new User(fName, lName, email, pass, role, phone);
-        boolean success = dbHelper.createUser(newUser);
+        boolean success = dbHelper.registerUser(newUser);
 
         // Hide loading
         if (progressBar != null) {
