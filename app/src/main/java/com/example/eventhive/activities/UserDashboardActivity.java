@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventhive.R;
 import com.example.eventhive.adapters.EventAdapter;
+import com.example.eventhive.auth.AuthManager;
 import com.example.eventhive.databases.DatabaseHelper;
 import com.example.eventhive.models.Event;
 import com.example.eventhive.utils.SessionManager;
@@ -26,10 +27,11 @@ public class UserDashboardActivity extends AppCompatActivity {
     private EventAdapter adapter;
     private TextView tvEmptyState;
     private ProgressBar progressBar;
-    private ImageView navHome, navTicket, navNotifications, navProfile;
+    private ImageView navHome, navTicket, navNotifications, navLogout;
 
     private DatabaseHelper dbHelper;
     private SessionManager session;
+    private AuthManager authManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +50,9 @@ public class UserDashboardActivity extends AppCompatActivity {
                 return;
             }
 
-            // Initialize DatabaseHelper
+            // Initialize DatabaseHelper and AuthManager
             dbHelper = new DatabaseHelper(this);
+            authManager = new AuthManager();
 
             // Initialize Views
             recyclerView = findViewById(R.id.recyclerViewEvents);
@@ -58,7 +61,7 @@ public class UserDashboardActivity extends AppCompatActivity {
             navHome = findViewById(R.id.navHome);
             navTicket = findViewById(R.id.navTicket);
             navNotifications = findViewById(R.id.navNotifications);
-            navProfile = findViewById(R.id.navProfile);
+            navLogout = findViewById(R.id.navLogout);
 
             // Setup RecyclerView
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -114,9 +117,18 @@ public class UserDashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        navProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, ProfileActivity.class);
+        navLogout.setOnClickListener(v -> {
+            // Logout from Firebase
+            authManager.logout();
+
+            // Clear session
+            session.logoutUser();
+
+            // Navigate to login
+            Intent intent = new Intent(UserDashboardActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
     }
 

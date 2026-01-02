@@ -5,13 +5,21 @@ import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.eventhive.R;
+import com.example.eventhive.auth.AuthManager;
+import com.example.eventhive.utils.SessionManager;
 
 public class AdminDashboardActivity extends AppCompatActivity {
+
+    private AuthManager authManager;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
+
+        authManager = new AuthManager();
+        sessionManager = new SessionManager(this);
 
         android.view.View btnManageUsers = findViewById(R.id.btnManageUsers);
         android.view.View btnViewEvents = findViewById(R.id.btnViewEvents);
@@ -37,6 +45,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
         }
 
         btnLogout.setOnClickListener(v -> {
+            // Logout from Firebase
+            authManager.logout();
+
+            // Clear session
+            sessionManager.logoutUser();
+
+            // Navigate to login
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

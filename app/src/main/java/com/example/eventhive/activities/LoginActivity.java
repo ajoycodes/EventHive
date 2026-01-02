@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.example.eventhive.auth.RoleCallback;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailInput, passwordInput;
+    private Spinner spinnerRole;
     private Button loginBtn;
     private TextView goRegisterBtn;
     private ProgressBar progressBar;
@@ -40,10 +42,14 @@ public class LoginActivity extends AppCompatActivity {
 
         emailInput = findViewById(R.id.etEmail);
         passwordInput = findViewById(R.id.etPassword);
+        spinnerRole = findViewById(R.id.spinnerRole);
         loginBtn = findViewById(R.id.btnLogin);
         goRegisterBtn = findViewById(R.id.goRegisterBtn);
         progressBar = findViewById(R.id.progressBar);
         android.view.View registerContainer = findViewById(R.id.registerContainer);
+
+        // Setup role spinner
+        setupRoleSpinner();
 
         // Hide progress bar initially
         if (progressBar != null) {
@@ -71,9 +77,25 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void setupRoleSpinner() {
+        String[] roles = new String[] { "User", "Organizer", "Admin" };
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, roles);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerRole.setAdapter(adapter);
+        spinnerRole.setSelection(0); // Default to "User"
+    }
+
     private void handleLogin() {
         String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
+
+        Object selectedItem = spinnerRole.getSelectedItem();
+        if (selectedItem == null) {
+            Toast.makeText(this, "Please select a role", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String selectedRole = selectedItem.toString();
 
         // Validate inputs
         if (email.isEmpty() || password.isEmpty()) {
@@ -105,6 +127,14 @@ public class LoginActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                         }
                         loginBtn.setEnabled(true);
+
+                        // Verify role matches selected role
+                        if (!role.equalsIgnoreCase(selectedRole)) {
+                            Toast.makeText(LoginActivity.this,
+                                    "Invalid role. Please select " + role + " and try again.",
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
                         android.util.Log.d("LOGIN", "Login successful: " + email + ", Role: " + role);
 

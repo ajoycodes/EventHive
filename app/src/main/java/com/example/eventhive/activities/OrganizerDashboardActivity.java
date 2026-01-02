@@ -7,13 +7,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.eventhive.R;
+import com.example.eventhive.auth.AuthManager;
 import com.example.eventhive.databases.DatabaseHelper;
 import com.example.eventhive.models.Event;
+import com.example.eventhive.utils.SessionManager;
 import java.util.List;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
+    private AuthManager authManager;
+    private SessionManager sessionManager;
     private TextView tvTotalEvents, tvActiveEvents;
 
     @Override
@@ -22,6 +26,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_organizer_dashboard);
 
         dbHelper = new DatabaseHelper(this);
+        authManager = new AuthManager();
+        sessionManager = new SessionManager(this);
 
         android.view.View btnCreateEvent = findViewById(R.id.btnCreateEvent);
         android.view.View btnMyEvents = findViewById(R.id.btnMyEvents);
@@ -49,6 +55,13 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
 
         btnLogout.setOnClickListener(v -> {
+            // Logout from Firebase
+            authManager.logout();
+
+            // Clear session
+            sessionManager.logoutUser();
+
+            // Navigate to login
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

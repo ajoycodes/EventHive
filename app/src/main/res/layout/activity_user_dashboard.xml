@@ -98,12 +98,13 @@
             
             <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
 
-            <!-- Profile/Settings -->
+            <!-- Logout -->
             <ImageView
                 android:id="@+id/navLogout"
                 android:layout_width="@dimen/bottom_nav_icon_size"
                 android:layout_height="@dimen/bottom_nav_icon_size"
-                android:src="@drawable/ic_settings"
+                android:src="@drawable/ic_logout"
+                android:contentDescription="Logout"
                 app:tint="@color/nav_inactive"
                 android:alpha="1.0"/>
         </LinearLayout>

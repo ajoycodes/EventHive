@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
+    // Temporarily commented out - uncomment after adding google-services.json
+    // id("com.google.gms.google-services")
 }
 
 android {

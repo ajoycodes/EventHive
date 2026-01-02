@@ -38,6 +38,26 @@
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="@dimen/spacing_xxxl"/>
 
+        <!-- Role Selection Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Your Role"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Role Spinner -->
+        <Spinner
+            android:id="@+id/spinnerRole"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/input_bg"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="@dimen/spacing_m"/>
+
         <!-- Email Input -->
         <EditText
             android:id="@+id/etEmail"
