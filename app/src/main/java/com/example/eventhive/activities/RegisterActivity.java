@@ -14,8 +14,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.eventhive.R;
-import com.example.eventhive.databases.DatabaseHelper;
-import com.example.eventhive.models.User;
+import com.example.eventhive.auth.AuthManager;
+import com.example.eventhive.auth.AuthCallback;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -24,7 +24,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnRegister;
     private TextView tvLogin;
     private ProgressBar progressBar;
-    private DatabaseHelper dbHelper;
+    private AuthManager authManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +39,8 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Initialize DatabaseHelper
-        dbHelper = new DatabaseHelper(this);
+        // Initialize Firebase AuthManager
+        authManager = new AuthManager();
 
         // Initialize views
         etFirstName = findViewById(R.id.etFirstName);
@@ -144,23 +144,36 @@ public class RegisterActivity extends AppCompatActivity {
         }
         btnRegister.setEnabled(false);
 
-        // Create user
-        User newUser = new User(fName, lName, email, pass, role, phone);
-        boolean success = dbHelper.registerUser(newUser);
+        // Register with Firebase
+        authManager.register(email, pass, fName, lName, role, phone, new AuthCallback() {
+            @Override
+            public void onSuccess(String uid) {
+                // Hide loading
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                btnRegister.setEnabled(true);
 
-        // Hide loading
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
-        }
-        btnRegister.setEnabled(true);
+                android.util.Log.d("REGISTER", "Registration successful for: " + email);
+                Toast.makeText(RegisterActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
 
-        if (success) {
-            Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Registration failed. Email may already exist.", Toast.LENGTH_SHORT).show();
-        }
+                // Navigate to login screen
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                // Hide loading
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                btnRegister.setEnabled(true);
+
+                android.util.Log.e("REGISTER", "Registration failed: " + errorMessage);
+                Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

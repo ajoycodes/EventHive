@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String PREF_NAME = "EventHivePref";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USER_ID = "userId";
+    private static final String KEY_USER_UID = "userUid"; // Firebase UID
     private static final String KEY_USER_ROLE = "userRole";
     private static final String KEY_USER_NAME = "userName";
     private static final String KEY_USER_EMAIL = "userEmail";
@@ -22,6 +23,31 @@ public class SessionManager {
         editor = pref.edit();
     }
 
+    /**
+     * Creates login session with Firebase UID
+     * 
+     * @param uid   Firebase user ID (String)
+     * @param name  User's first name
+     * @param email User's email
+     * @param role  User's role
+     * @param phone User's phone number
+     */
+    public void createLoginSession(String uid, String name, String email, String role, String phone) {
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.putString(KEY_USER_UID, uid);
+        editor.putString(KEY_USER_NAME, name);
+        editor.putString(KEY_USER_EMAIL, email);
+        editor.putString(KEY_USER_ROLE, role);
+        editor.putString(KEY_USER_PHONE, phone != null ? phone : "");
+        editor.apply();
+    }
+
+    /**
+     * Legacy method for backward compatibility with SQLite-based features
+     * 
+     * @deprecated Use createLoginSession(String uid, ...) for Firebase
+     */
+    @Deprecated
     public void createLoginSession(int id, String name, String email, String role, String phone) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putInt(KEY_USER_ID, id);
@@ -36,6 +62,21 @@ public class SessionManager {
         return pref.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
+    /**
+     * Gets Firebase user UID
+     * 
+     * @return Firebase UID or empty string if not set
+     */
+    public String getUserUid() {
+        return pref.getString(KEY_USER_UID, "");
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * 
+     * @deprecated Use getUserUid() for Firebase
+     */
+    @Deprecated
     public int getUserId() {
         return pref.getInt(KEY_USER_ID, -1);
     }
