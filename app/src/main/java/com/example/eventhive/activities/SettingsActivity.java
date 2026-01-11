@@ -57,13 +57,9 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         btnLogout.setOnClickListener(v -> {
-            // Logout from Firebase
             authManager.logout();
+            sessionManager.clearSession();
 
-            // Clear session
-            sessionManager.logoutUser();
-
-            // Navigate to login
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

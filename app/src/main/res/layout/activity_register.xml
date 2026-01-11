@@ -87,6 +87,20 @@
             android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Confirm Password -->
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:background="@drawable/input_bg"
+            android:paddingHorizontal="16dp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
         <!-- Phone -->
         <EditText
             android:id="@+id/etPhone"
@@ -133,7 +147,16 @@
             android:textColor="@color/white"
             android:background="@drawable/btn_primary"
             android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"/>
 
         <!-- Login Link -->
         <LinearLayout
@@ -151,7 +174,7 @@
                 android:textSize="16sp"/>
 
             <TextView
-                android:id="@+id/goLoginBtn"
+                android:id="@+id/tvLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sign In"

@@ -44,6 +44,25 @@
         android:paddingBottom="8dp"
         android:clipToPadding="false"/>
 
+    <!-- Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+    <!-- Empty State Text -->
+    <TextView
+        android:id="@+id/tvEmptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="No events found"
+        android:textColor="@color/text_secondary"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
     <!-- Bottom Navigation -->
     <androidx.cardview.widget.CardView
         android:id="@+id/navCard"
@@ -65,6 +84,7 @@
 
             <!-- Home (Active) -->
             <ImageView
+                android:id="@+id/navHome"
                 android:layout_width="@dimen/bottom_nav_icon_size"
                 android:layout_height="@dimen/bottom_nav_icon_size"
                 android:src="@drawable/ic_home"

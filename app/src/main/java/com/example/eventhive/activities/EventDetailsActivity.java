@@ -185,7 +185,7 @@ public class EventDetailsActivity extends AppCompatActivity {
 
     private void setupPurchaseButton() {
         DatabaseHelper db = new DatabaseHelper(this);
-        SessionManager session = new SessionManager(this);
+        SessionManager session = SessionManager.getInstance(this);
 
         btnPurchase.setOnClickListener(v -> {
             if (!session.isLoggedIn()) {

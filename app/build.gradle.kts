@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    // Temporarily commented out - uncomment after adding google-services.json
-    // id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -35,13 +34,16 @@ android {
 
 dependencies {
     // Firebase BoM - manages all Firebase library versions
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
     
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
+    
+    // Firebase App Check (for development)
+    implementation("com.google.firebase:firebase-appcheck-debug")
     
     // Existing dependencies
     implementation(libs.appcompat)

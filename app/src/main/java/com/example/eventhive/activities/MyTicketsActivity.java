@@ -37,7 +37,7 @@ public class MyTicketsActivity extends AppCompatActivity {
             ticketRecyclerView = findViewById(R.id.ticketRecyclerView);
             tvEmptyState = findViewById(R.id.tvEmptyState);
             dbHelper = new DatabaseHelper(this);
-            session = new SessionManager(this);
+            session = SessionManager.getInstance(this);
 
             if (ticketRecyclerView != null) {
                 ticketRecyclerView.setLayoutManager(new LinearLayoutManager(this));

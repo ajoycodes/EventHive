@@ -42,7 +42,7 @@ public class UserDashboardActivity extends AppCompatActivity {
             setContentView(R.layout.activity_user_dashboard);
 
             // Session check
-            session = new SessionManager(this);
+            session = SessionManager.getInstance(this);
             if (!session.isLoggedIn()) {
                 android.util.Log.e("UserDashboard", "Invalid session, redirecting to login");
                 startActivity(new Intent(this, LoginActivity.class));
@@ -94,11 +94,19 @@ public class UserDashboardActivity extends AppCompatActivity {
 
         if (events != null && !events.isEmpty()) {
             adapter.updateEvents(events);
-            tvEmptyState.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+            if (tvEmptyState != null) {
+                tvEmptyState.setVisibility(View.GONE);
+            }
+            if (recyclerView != null) {
+                recyclerView.setVisibility(View.VISIBLE);
+            }
         } else {
-            tvEmptyState.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
+            if (tvEmptyState != null) {
+                tvEmptyState.setVisibility(View.VISIBLE);
+            }
+            if (recyclerView != null) {
+                recyclerView.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -118,11 +126,9 @@ public class UserDashboardActivity extends AppCompatActivity {
         });
 
         navLogout.setOnClickListener(v -> {
-            // Logout from Firebase
+            // Logout: clear Firebase and session
             authManager.logout();
-
-            // Clear session
-            session.logoutUser();
+            session.clearSession();
 
             // Navigate to login
             Intent intent = new Intent(UserDashboardActivity.this, LoginActivity.class);

@@ -7,26 +7,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.eventhive.R;
-import com.example.eventhive.databases.DatabaseHelper;
-import com.example.eventhive.models.User;
+import com.example.eventhive.utils.SessionManager;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView tvInitials, tvUserName, tvUserEmail;
+    private TextView tvUserName, tvUserEmail;
     private TextView tvFirstName, tvLastName, tvPhone, tvRole;
     private Button btnEditProfile;
     private ImageView btnBack;
-    private DatabaseHelper dbHelper;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        dbHelper = new DatabaseHelper(this);
+        sessionManager = SessionManager.getInstance(this);
 
         // Initialize views
-        tvInitials = findViewById(R.id.tvInitials);
         tvUserName = findViewById(R.id.tvUserName);
         tvUserEmail = findViewById(R.id.tvUserEmail);
         tvFirstName = findViewById(R.id.tvFirstName);
@@ -36,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnBack = findViewById(R.id.btnBack);
 
-        // Load user data (placeholder - you'd get actual user from session/preferences)
+        // Load user data from session
         loadUserProfile();
 
         btnBack.setOnClickListener(v -> finish());
@@ -49,27 +47,29 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserProfile() {
-        // Placeholder data - in real app, get from SharedPreferences or database
-        String firstName = "John";
-        String lastName = "Doe";
-        String email = "john.doe@example.com";
-        String phone = "+1 234 567 8900";
-        String role = "User";
+        // Get user data from SessionManager
+        String userName = sessionManager.getUserName();
+        String email = sessionManager.getUserEmail();
+        String phone = sessionManager.getUserPhone();
+        String role = sessionManager.getUserRole();
 
-        // Set initials
-        String initials = "";
-        if (!firstName.isEmpty())
-            initials += firstName.charAt(0);
-        if (!lastName.isEmpty())
-            initials += lastName.charAt(0);
-        tvInitials.setText(initials.toUpperCase());
+        // Parse first and last name from userName
+        String firstName = "";
+        String lastName = "";
+        if (userName != null && !userName.isEmpty()) {
+            String[] nameParts = userName.split(" ", 2);
+            firstName = nameParts[0];
+            if (nameParts.length > 1) {
+                lastName = nameParts[1];
+            }
+        }
 
         // Set user info
-        tvUserName.setText(firstName + " " + lastName);
-        tvUserEmail.setText(email);
-        tvFirstName.setText(firstName);
-        tvLastName.setText(lastName);
-        tvPhone.setText(phone);
-        tvRole.setText(role);
+        tvUserName.setText(userName != null && !userName.isEmpty() ? userName : "User");
+        tvUserEmail.setText(email != null && !email.isEmpty() ? email : "No email");
+        tvFirstName.setText(firstName.isEmpty() ? "N/A" : firstName);
+        tvLastName.setText(lastName.isEmpty() ? "N/A" : lastName);
+        tvPhone.setText(phone != null && !phone.isEmpty() ? phone : "No phone");
+        tvRole.setText(role != null && !role.isEmpty() ? role : "User");
     }
 }

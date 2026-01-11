@@ -49,7 +49,7 @@ public class NotificationsActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBack);
 
         dbHelper = new DatabaseHelper(this);
-        session = new SessionManager(this);
+        session = SessionManager.getInstance(this);
 
         // Setup RecyclerView
         recyclerViewNotifications.setLayoutManager(new LinearLayoutManager(this));

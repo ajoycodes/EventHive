@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
-        sessionManager = new SessionManager(this);
+        sessionManager = SessionManager.getInstance(this);
 
         // Delay for splash screen effect
         new Handler(Looper.getMainLooper()).postDelayed(() -> {

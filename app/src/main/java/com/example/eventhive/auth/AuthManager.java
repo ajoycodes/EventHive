@@ -19,12 +19,19 @@ public class AuthManager {
     private static final String TAG = "AuthManager";
     private static final String USERS_COLLECTION = "users";
 
-    private final FirebaseAuth mAuth;
-    private final FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     public AuthManager() {
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        try {
+            mAuth = FirebaseAuth.getInstance();
+            db = FirebaseFirestore.getInstance();
+            Log.d(TAG, "Firebase initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Firebase not available - google-services.json may be missing", e);
+            mAuth = null;
+            db = null;
+        }
     }
 
     /**
@@ -41,6 +48,11 @@ public class AuthManager {
      */
     public void register(String email, String password, String firstName, String lastName,
             String role, String phone, AuthCallback callback) {
+        if (mAuth == null || db == null) {
+            callback.onFailure("Firebase is not configured. Please add google-services.json.");
+            return;
+        }
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -96,6 +108,11 @@ public class AuthManager {
      * @param callback Callback for success/failure
      */
     public void login(String email, String password, AuthCallback callback) {
+        if (mAuth == null) {
+            callback.onFailure("Firebase is not configured. Please add google-services.json.");
+            return;
+        }
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -149,8 +166,10 @@ public class AuthManager {
      * Logs out the current user
      */
     public void logout() {
-        mAuth.signOut();
-        Log.d(TAG, "User logged out");
+        if (mAuth != null) {
+            mAuth.signOut();
+            Log.d(TAG, "User logged out");
+        }
     }
 
     /**
@@ -159,7 +178,7 @@ public class AuthManager {
      * @return FirebaseUser or null if not authenticated
      */
     public FirebaseUser getCurrentUser() {
-        return mAuth.getCurrentUser();
+        return mAuth != null ? mAuth.getCurrentUser() : null;
     }
 
     /**

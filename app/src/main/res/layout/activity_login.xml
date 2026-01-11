@@ -1,127 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/secondary_background">
+    android:background="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/spacing_xxl"
+        android:padding="24dp"
         android:gravity="center">
-
-        <!-- Logo -->
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@drawable/ic_logo"
-            android:background="@drawable/round_logo_bg"
-            android:backgroundTint="@color/brand_primary"
-            android:padding="12dp"
-            android:layout_marginTop="64dp"
-            android:layout_marginBottom="16dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome Back"
-            style="@style/TextAppearance.Display"
-            android:layout_marginBottom="@dimen/spacing_s"/>
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="10dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign in to continue"
-            style="@style/TextAppearance.Body"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="@dimen/spacing_xxxl"/>
+            android:text="Login to continue"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="40dp"/>
 
-        <!-- Role Selection Label -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Your Role"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="8dp"/>
-
-        <!-- Role Spinner -->
-        <Spinner
-            android:id="@+id/spinnerRole"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/input_bg"
-            android:paddingHorizontal="16dp"
-            android:layout_marginBottom="@dimen/spacing_m"/>
-
-        <!-- Email Input -->
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/AppleInput"
+            android:layout_height="56dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:layout_marginBottom="@dimen/spacing_m"/>
+            android:padding="16dp"
+            android:background="@drawable/input_bg"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Password Input -->
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/AppleInput"
+            android:layout_height="56dp"
             android:hint="Password"
             android:inputType="textPassword"
-            android:layout_marginBottom="@dimen/spacing_xl"/>
+            android:padding="16dp"
+            android:background="@drawable/input_bg"
+            android:textSize="16sp"
+            android:layout_marginBottom="24dp"/>
 
-        <!-- Progress Bar -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Login"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/round_white_bg"
+            android:backgroundTint="#2196F3"
+            android:layout_marginBottom="16dp"/>
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:visibility="gone"
-            android:layout_marginBottom="@dimen/spacing_m"/>
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Login Button -->
-        <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvRegister"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Button.Primary"
-            android:text="Sign In"
-            android:layout_marginBottom="@dimen/spacing_xxl"/>
-
-        <!-- Register Link -->
-        <LinearLayout
-            android:id="@+id/registerContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Don't have an account? "
-                android:textColor="@color/text_secondary"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/goRegisterBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sign Up"
-                android:textColor="@color/brand_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"/>
-        </LinearLayout>
+            android:text="Don't have an account? Register"
+            android:textColor="#2196F3"
+            android:textSize="14sp"
+            android:padding="8dp"/>
 
     </LinearLayout>
-
 </ScrollView>

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">EventHive</string>
+    
+    <!-- Role Selection -->
+    <string-array name="user_roles">
+        <item>User</item>
+        <item>Organizer</item>
+        <item>Admin</item>
+    </string-array>
 </resources>

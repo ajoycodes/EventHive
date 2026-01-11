@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SessionManager {
+    private static SessionManager instance;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private Context context;
@@ -17,20 +18,40 @@ public class SessionManager {
     private static final String KEY_USER_EMAIL = "userEmail";
     private static final String KEY_USER_PHONE = "userPhone";
 
+    // Simple constructor - use this in your activities
     public SessionManager(Context context) {
         this.context = context;
         pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = pref.edit();
     }
 
+    // Optional: getInstance() method (advanced users can use this)
+    public static synchronized SessionManager getInstance(Context context) {
+        if (instance == null) {
+            instance = new SessionManager(context.getApplicationContext());
+        }
+        return instance;
+    }
+
     /**
-     * Creates login session with Firebase UID
+     * Creates login session with Firebase UID, role, name, and phone
      * 
-     * @param uid   Firebase user ID (String)
-     * @param name  User's first name
-     * @param email User's email
+     * @param uid   Firebase user ID
      * @param role  User's role
+     * @param name  User's first name
      * @param phone User's phone number
+     */
+    public void createLoginSession(String uid, String role, String name, String phone) {
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.putString(KEY_USER_UID, uid);
+        editor.putString(KEY_USER_ROLE, role);
+        editor.putString(KEY_USER_NAME, name);
+        editor.putString(KEY_USER_PHONE, phone != null ? phone : "");
+        editor.apply();
+    }
+
+    /**
+     * Full session creation with all parameters
      */
     public void createLoginSession(String uid, String name, String email, String role, String phone) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
@@ -107,5 +128,9 @@ public class SessionManager {
     public void logoutUser() {
         editor.clear();
         editor.apply();
+    }
+
+    public void clearSession() {
+        logoutUser();
     }
 }

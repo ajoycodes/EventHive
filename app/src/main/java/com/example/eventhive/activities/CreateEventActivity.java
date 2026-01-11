@@ -262,7 +262,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
         if (success) {
             // Create notification for successful event creation
-            SessionManager session = new SessionManager(this);
+            SessionManager session = SessionManager.getInstance(this);
             int userId = session.getUserId();
             String notificationTitle = "Event Created";
             String notificationMessage = "You successfully created the event \"" + title + "\"";
