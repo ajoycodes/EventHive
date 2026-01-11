@@ -49,6 +49,26 @@ public class MyTicketsActivity extends AppCompatActivity {
             }
 
             loadTickets();
+
+            // Search setup
+            android.widget.EditText etSearch = findViewById(R.id.etSearch);
+            etSearch.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (adapter != null) {
+                        adapter.filter(s.toString());
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {
+                }
+            });
+
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
             Toast.makeText(this, "Error loading tickets", Toast.LENGTH_SHORT).show();
@@ -59,8 +79,7 @@ public class MyTicketsActivity extends AppCompatActivity {
         try {
             String userUid = session.getUserUid();
 
-            // Show loading if possible (ticketRecyclerView might handle it or just be empty
-            // first)
+            // Show loading if possible
             if (tvEmptyState != null)
                 tvEmptyState.setVisibility(View.GONE);
             if (ticketRecyclerView != null)
@@ -119,10 +138,50 @@ public class MyTicketsActivity extends AppCompatActivity {
 
     // RecyclerView Adapter for Tickets
     private class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketViewHolder> {
-        private List<Ticket> tickets;
+        private List<Ticket> originalList; // Source of truth
+        private List<Ticket> filteredList; // Displayed list
 
         public TicketAdapter(List<Ticket> tickets) {
-            this.tickets = tickets != null ? tickets : new ArrayList<>();
+            this.originalList = tickets != null ? tickets : new ArrayList<>();
+            this.filteredList = new ArrayList<>(this.originalList);
+        }
+
+        // Filter Logic
+        public void filter(String query) {
+            filteredList.clear();
+            if (query == null || query.trim().isEmpty()) {
+                filteredList.addAll(originalList);
+            } else {
+                String lowerCaseQuery = query.toLowerCase().trim();
+                for (Ticket ticket : originalList) {
+                    // Search by: Title, Location, Date
+                    boolean matchesTitle = ticket.getEventTitle() != null &&
+                            ticket.getEventTitle().toLowerCase().contains(lowerCaseQuery);
+                    boolean matchesLocation = ticket.getEventLocation() != null &&
+                            ticket.getEventLocation().toLowerCase().contains(lowerCaseQuery);
+                    boolean matchesDate = ticket.getEventDate() != null &&
+                            ticket.getEventDate().toLowerCase().contains(lowerCaseQuery);
+
+                    if (matchesTitle || matchesLocation || matchesDate) {
+                        filteredList.add(ticket);
+                    }
+                }
+            }
+            notifyDataSetChanged();
+
+            // Handle "No Search Results" visibility
+            TextView tvNoSearchResults = findViewById(R.id.tvNoSearchResults);
+            if (filteredList.isEmpty() && !originalList.isEmpty()) {
+                if (tvNoSearchResults != null)
+                    tvNoSearchResults.setVisibility(View.VISIBLE);
+                if (ticketRecyclerView != null)
+                    ticketRecyclerView.setVisibility(View.GONE);
+            } else {
+                if (tvNoSearchResults != null)
+                    tvNoSearchResults.setVisibility(View.GONE);
+                if (ticketRecyclerView != null)
+                    ticketRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
 
         @NonNull
@@ -136,7 +195,7 @@ public class MyTicketsActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull TicketViewHolder holder, int position) {
             try {
-                Ticket ticket = tickets.get(position);
+                Ticket ticket = filteredList.get(position);
 
                 if (holder.tvEventTitle != null) {
                     holder.tvEventTitle.setText(ticket.getEventTitle() != null ? ticket.getEventTitle() : "Event");
@@ -158,7 +217,7 @@ public class MyTicketsActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return tickets.size();
+            return filteredList.size();
         }
 
         class TicketViewHolder extends RecyclerView.ViewHolder {
