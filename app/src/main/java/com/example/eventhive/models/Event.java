@@ -66,6 +66,13 @@ public class Event implements Serializable {
         this.eventType = "Other";
     }
 
+    // Firestore ID
+    private String firestoreId;
+
+    public Event() {
+        // Required for Firestore serialization
+    }
+
     // Comprehensive constructor with all fields including new ones
     public Event(int id, String title, String date, String location, String description,
             String status, double ticketPrice, int ticketQuantity,
@@ -99,6 +106,14 @@ public class Event implements Serializable {
         this.coverImagePath = coverImagePath;
         this.galleryImagePaths = galleryImagePaths;
         this.eventType = eventType;
+    }
+
+    public String getFirestoreId() {
+        return firestoreId;
+    }
+
+    public void setFirestoreId(String firestoreId) {
+        this.firestoreId = firestoreId;
     }
 
     // Getters

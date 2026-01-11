@@ -11,7 +11,7 @@ public interface RoleCallback {
      * @param firstName User's first name
      * @param phone     User's phone number
      */
-    void onRoleFetched(String role, String firstName, String phone);
+    void onRoleFetched(String role, String firstName, String email, String phone);
 
     /**
      * Called when role fetch fails

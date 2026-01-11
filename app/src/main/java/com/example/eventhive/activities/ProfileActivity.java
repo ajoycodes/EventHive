@@ -40,10 +40,14 @@ public class ProfileActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         btnEditProfile.setOnClickListener(v -> {
-            // TODO: Navigate to edit profile screen
-            android.widget.Toast.makeText(this, "Edit profile feature coming soon", android.widget.Toast.LENGTH_SHORT)
-                    .show();
+            startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserProfile();
     }
 
     private void loadUserProfile() {

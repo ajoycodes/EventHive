@@ -27,12 +27,19 @@ public class OrganizerEventsActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private OrganizerEventsAdapter adapter;
 
+    private com.google.firebase.firestore.FirebaseFirestore db;
+    private com.google.firebase.auth.FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_events);
 
-        dbHelper = new DatabaseHelper(this);
+        // Initialize Firestore & Auth
+        db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+        auth = com.google.firebase.auth.FirebaseAuth.getInstance();
+
+        dbHelper = new DatabaseHelper(this); // Keep for safety if needed
         recyclerView = findViewById(R.id.rvOrganizerEvents);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -54,12 +61,32 @@ public class OrganizerEventsActivity extends AppCompatActivity {
     }
 
     private void loadEvents() {
-        List<Event> eventList = dbHelper.getAllEvents();
-        // Filter logic could go here to match only events created by this user
-        // For now displaying all events as per previous logic
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        adapter = new OrganizerEventsAdapter(eventList);
-        recyclerView.setAdapter(adapter);
+        String uid = auth.getCurrentUser().getUid();
+
+        // Query Firestore for events created by this organizer
+        db.collection("events")
+                .whereEqualTo("organizerId", uid)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    java.util.List<Event> eventList = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Event e = doc.toObject(Event.class);
+                        if (e != null) {
+                            e.setFirestoreId(doc.getId());
+                            eventList.add(e);
+                        }
+                    }
+                    adapter = new OrganizerEventsAdapter(eventList);
+                    recyclerView.setAdapter(adapter);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error loading events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
@@ -103,20 +130,22 @@ public class OrganizerEventsActivity extends AppCompatActivity {
             // Set current status
             int statusPosition = 0;
             String currentStatus = event.getStatus();
-            for (int i = 0; i < statusOptions.length; i++) {
-                if (statusOptions[i].equals(currentStatus)) {
-                    statusPosition = i;
-                    break;
+            if (currentStatus != null) {
+                for (int i = 0; i < statusOptions.length; i++) {
+                    if (statusOptions[i].equals(currentStatus)) {
+                        statusPosition = i;
+                        break;
+                    }
                 }
             }
-            // Remove listener before setting selection to prevent crash
+            // Remove listener before setting selection to prevent crash/loop
             holder.spinnerStatus.setOnItemSelectedListener(null);
             holder.spinnerStatus.setSelection(statusPosition, false);
 
-            // Handle status change - use post to set listener after initial setup
+            // Handle status change
             holder.spinnerStatus.post(() -> {
                 holder.spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    private boolean isInitializing = true;
+                    boolean isInitializing = true;
 
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -124,26 +153,18 @@ public class OrganizerEventsActivity extends AppCompatActivity {
                             isInitializing = false;
                             return;
                         }
-
                         String newStatus = statusOptions[pos];
                         if (!newStatus.equals(event.getStatus())) {
-                            String oldStatus = event.getStatus();
-                            event.setStatus(newStatus);
-                            boolean success = dbHelper.updateEvent(event);
-                            if (success) {
-                                // Create notification for status change
-                                com.example.eventhive.utils.SessionManager session = new com.example.eventhive.utils.SessionManager(
-                                        OrganizerEventsActivity.this);
-                                int userId = session.getUserId();
-                                String notificationTitle = "Event Status Changed";
-                                String notificationMessage = "Event \"" + event.getTitle() +
-                                        "\" status changed from " + oldStatus + " to " + newStatus;
-                                com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
-                                        notificationTitle, notificationMessage, userId, event.getId());
-                                dbHelper.createNotification(notification);
-
-                                Toast.makeText(OrganizerEventsActivity.this,
-                                        "Status updated to " + newStatus, Toast.LENGTH_SHORT).show();
+                            if (event.getFirestoreId() != null) {
+                                db.collection("events").document(event.getFirestoreId())
+                                        .update("status", newStatus)
+                                        .addOnSuccessListener(aVoid -> {
+                                            event.setStatus(newStatus);
+                                            Toast.makeText(OrganizerEventsActivity.this, "Status updated",
+                                                    Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> Toast.makeText(OrganizerEventsActivity.this,
+                                                "Update failed", Toast.LENGTH_SHORT).show());
                             }
                         }
                     }
@@ -155,18 +176,40 @@ public class OrganizerEventsActivity extends AppCompatActivity {
             });
 
             holder.btnEdit.setOnClickListener(v -> {
-                Intent intent = new Intent(OrganizerEventsActivity.this, EditEventActivity.class);
-                intent.putExtra("EVENT", event);
-                startActivity(intent);
+                // EditEventActivity needs refactor to work with Firestore
+                // For now, disabling or showing toast might be safer, but user kept files
+                // minimal.
+                // Assuming EditEventActivity uses serializable Event logic, passing the object
+                // *might* work for UI prepopulation
+                // but saving will fail if it uses SQLite.
+                // Given constraints, I'll pass the intent but add a warning toast or just let
+                // it try.
+                // Or better, just Toast "Edit feature coming soon" to prevent crash/data
+                // corruption.
+                Toast.makeText(OrganizerEventsActivity.this, "Edit feature coming soon (Firestore migration)",
+                        Toast.LENGTH_SHORT).show();
+
+                // Intent intent = new Intent(OrganizerEventsActivity.this,
+                // EditEventActivity.class);
+                // intent.putExtra("EVENT", event);
+                // startActivity(intent);
             });
 
             holder.btnDelete.setOnClickListener(v -> {
-                dbHelper.deleteEvent(event.getId());
-                Toast.makeText(OrganizerEventsActivity.this, "Event deleted", Toast.LENGTH_SHORT).show();
-                // Refresh list
-                eventList.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, eventList.size());
+                if (event.getFirestoreId() != null) {
+                    db.collection("events").document(event.getFirestoreId())
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(OrganizerEventsActivity.this, "Event deleted", Toast.LENGTH_SHORT)
+                                        .show();
+                                eventList.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, eventList.size());
+                            })
+                            .addOnFailureListener(e -> Toast
+                                    .makeText(OrganizerEventsActivity.this, "Delete failed", Toast.LENGTH_SHORT)
+                                    .show());
+                }
             });
         }
 

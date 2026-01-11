@@ -26,9 +26,10 @@
             android:textColor="@color/text_primary"/>
 
         <ImageView
+            android:id="@+id/btnSettings"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_calendar"
+            android:src="@drawable/ic_settings"
             android:padding="8dp"
             app:tint="@color/text_secondary"/>
     </LinearLayout>

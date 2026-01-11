@@ -12,7 +12,7 @@ import com.example.eventhive.utils.SessionManager;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private View btnProfile, btnNotifications, btnHelp, btnAbout;
+    private View btnProfile, btnHelp, btnAbout;
     private Button btnLogout;
     private ImageView btnBack;
     private AuthManager authManager;
@@ -27,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
 
         btnProfile = findViewById(R.id.btnProfile);
-        btnNotifications = findViewById(R.id.btnNotifications);
+
         btnHelp = findViewById(R.id.btnHelp);
         btnAbout = findViewById(R.id.btnAbout);
         btnLogout = findViewById(R.id.btnLogout);
@@ -38,12 +38,6 @@ public class SettingsActivity extends AppCompatActivity {
         btnProfile.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
-        });
-
-        btnNotifications.setOnClickListener(v -> {
-
-            android.widget.Toast.makeText(this, "Notifications feature coming soon", android.widget.Toast.LENGTH_SHORT)
-                    .show();
         });
 
         btnHelp.setOnClickListener(v -> {

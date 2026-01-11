@@ -7,13 +7,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.example.eventhive.models.User;
 import com.example.eventhive.models.Event;
+import com.example.eventhive.models.Ticket;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "EventHive.db";
-    private static final int DATABASE_VERSION = 5; // Incremented for notifications table
+    private static final int DATABASE_VERSION = 6; // Incremented for user_uid support
 
     // Users Table
     private static final String TABLE_USERS = "users";
@@ -44,19 +46,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Tickets Table
     private static final String TABLE_TICKETS = "tickets";
     private static final String COL_TICKET_ID = "id";
-    private static final String COL_TICKET_USER_ID = "user_id";
+    private static final String COL_TICKET_USER_ID = "user_id"; // Legacy integer ID
+    private static final String COL_TICKET_USER_UID = "user_uid"; // Firebase UID
     private static final String COL_TICKET_EVENT_ID = "event_id";
     private static final String COL_TICKET_CODE = "unique_code";
-    private static final String COL_TICKET_TIMESTAMP = "purchase_timestamp"; // New column
+    private static final String COL_TICKET_TIMESTAMP = "purchase_timestamp";
 
-    // Notifications Table (NEW)
+    // Notifications Table
     private static final String TABLE_NOTIFICATIONS = "notifications";
     private static final String COL_NOTIF_ID = "id";
     private static final String COL_NOTIF_TITLE = "title";
     private static final String COL_NOTIF_MESSAGE = "message";
     private static final String COL_NOTIF_TIMESTAMP = "timestamp";
     private static final String COL_NOTIF_IS_READ = "is_read";
-    private static final String COL_NOTIF_USER_ID = "user_id";
+    private static final String COL_NOTIF_USER_ID = "user_id"; // Legacy
+    private static final String COL_NOTIF_USER_UID = "user_uid"; // Firebase UID
     private static final String COL_NOTIF_RELATED_EVENT_ID = "related_event_id";
 
     public DatabaseHelper(Context context) {
@@ -93,19 +97,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createTickets = "CREATE TABLE " + TABLE_TICKETS + " (" +
                 COL_TICKET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_TICKET_USER_ID + " INTEGER, " +
+                COL_TICKET_USER_UID + " TEXT, " +
                 COL_TICKET_EVENT_ID + " INTEGER, " +
                 COL_TICKET_CODE + " TEXT, " +
                 COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0)";
         db.execSQL(createTickets);
 
-        // Create notifications table
         String createNotifications = "CREATE TABLE " + TABLE_NOTIFICATIONS + " (" +
                 COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_NOTIF_TITLE + " TEXT, " +
                 COL_NOTIF_MESSAGE + " TEXT, " +
                 COL_NOTIF_TIMESTAMP + " INTEGER, " +
-                COL_NOTIF_IS_READ + " INTEGER DEFAULT 0, " + // 0 = false, 1 = true
+                COL_NOTIF_IS_READ + " INTEGER DEFAULT 0, " +
                 COL_NOTIF_USER_ID + " INTEGER, " +
+                COL_NOTIF_USER_UID + " TEXT, " +
                 COL_NOTIF_RELATED_EVENT_ID + " INTEGER DEFAULT 0)";
         db.execSQL(createNotifications);
 
@@ -127,22 +132,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void insertDummyEvents(SQLiteDatabase db) {
-        // Need to ensure these operations happen during creation
-        // We'll insert raw SQL or use helper methods if called outside onCreate
-        // For onCreate, we use standard SQL
         db.execSQL("INSERT INTO " + TABLE_EVENTS + " (title, date, location, description, image_res_id) VALUES " +
-                "('WaveFest - Feel The Winter', '12 Dec - 10 PM', 'Bashundhara R/A, Dhaka', 'A music event bringing people together with electric energy.', 0)"); // 0
-                                                                                                                                                                  // as
-                                                                                                                                                                  // placeholder
+                "('WaveFest - Feel The Winter', '12 Dec - 10 PM', 'Bashundhara R/A, Dhaka', 'A music event bringing people together with electric energy.', 0)");
         db.execSQL("INSERT INTO " + TABLE_EVENTS + " (title, date, location, description, image_res_id) VALUES " +
                 "('Tech Summit 2024', '15 Jan - 9 AM', 'ICCB, Dhaka', 'The biggest tech conference in the city.', 0)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Handle upgrade from version 3 to 4
         if (oldVersion < 4) {
-            // Add new columns to events table
             try {
                 db.execSQL(
                         "ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_TICKET_PRICE + " REAL DEFAULT 0.0");
@@ -151,24 +149,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_COVER_IMAGE_PATH + " TEXT");
                 db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_GALLERY_PATHS + " TEXT");
                 db.execSQL("ALTER TABLE " + TABLE_EVENTS + " ADD COLUMN " + COL_EVENT_TYPE + " TEXT DEFAULT 'Other'");
-
-                // Add new column to tickets table
                 db.execSQL(
                         "ALTER TABLE " + TABLE_TICKETS + " ADD COLUMN " + COL_TICKET_TIMESTAMP + " INTEGER DEFAULT 0");
             } catch (Exception e) {
                 android.util.Log.e("DatabaseHelper", "Error during v3->v4 migration: " + e.getMessage());
-                // If migration fails, fall back to recreating tables (data loss)
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_TICKETS);
-                onCreate(db);
-                return;
             }
         }
 
-        // Handle upgrade from version 4 to 5
         if (oldVersion < 5) {
-            // Create notifications table
             try {
                 String createNotifications = "CREATE TABLE " + TABLE_NOTIFICATIONS + " (" +
                         COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -183,6 +171,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 android.util.Log.e("DatabaseHelper", "Error during v4->v5 migration: " + e.getMessage());
             }
         }
+
+        if (oldVersion < 6) {
+            try {
+                db.execSQL("ALTER TABLE " + TABLE_TICKETS + " ADD COLUMN " + COL_TICKET_USER_UID + " TEXT");
+                db.execSQL("ALTER TABLE " + TABLE_NOTIFICATIONS + " ADD COLUMN " + COL_NOTIF_USER_UID + " TEXT");
+            } catch (Exception e) {
+                android.util.Log.e("DatabaseHelper", "Error during v5->v6 migration: " + e.getMessage());
+            }
+        }
     }
 
     // --- User Operations ---
@@ -195,7 +192,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_USER_PASS, user.getPassword());
         values.put(COL_USER_ROLE, user.getRole());
         values.put(COL_USER_PHONE, user.getPhone());
-
         long result = db.insert(TABLE_USERS, null, values);
         return result != -1;
     }
@@ -205,7 +201,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(TABLE_USERS, null,
                 COL_USER_EMAIL + "=? AND " + COL_USER_PASS + "=?",
                 new String[] { email, password }, null, null, null);
-
         if (cursor != null && cursor.moveToFirst()) {
             User user = new User(
                     cursor.getInt(cursor.getColumnIndexOrThrow(COL_USER_ID)),
@@ -254,9 +249,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_EVENT_DATE, event.getDate());
         values.put(COL_EVENT_LOCATION, event.getLocation());
         values.put(COL_EVENT_DESC, event.getDescription());
-        values.put(COL_EVENT_IMAGE, 0); // Legacy placeholder
+        values.put(COL_EVENT_IMAGE, 0);
         values.put(COL_EVENT_STATUS, event.getStatus());
-        // New fields
         values.put(COL_EVENT_TICKET_PRICE, event.getTicketPrice());
         values.put(COL_EVENT_TICKET_QUANTITY, event.getTicketQuantity());
         values.put(COL_EVENT_COVER_IMAGE_PATH, event.getCoverImagePath());
@@ -274,7 +268,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_EVENT_LOCATION, event.getLocation());
         values.put(COL_EVENT_DESC, event.getDescription());
         values.put(COL_EVENT_STATUS, event.getStatus());
-        // Update new fields if needed
         values.put(COL_EVENT_TICKET_PRICE, event.getTicketPrice());
         values.put(COL_EVENT_TICKET_QUANTITY, event.getTicketQuantity());
         values.put(COL_EVENT_COVER_IMAGE_PATH, event.getCoverImagePath());
@@ -293,35 +286,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Event> eventList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_EVENTS, null);
-
         if (cursor.moveToFirst()) {
             do {
-                // Read basic fields
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_EVENT_ID));
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_TITLE));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DATE));
                 String location = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_LOCATION));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COL_EVENT_DESC));
 
-                // Read status
-                String status = "Active"; // Default
+                String status = "Active";
                 int statusIndex = cursor.getColumnIndex(COL_EVENT_STATUS);
-                if (statusIndex != -1 && cursor.getString(statusIndex) != null) {
+                if (statusIndex != -1 && cursor.getString(statusIndex) != null)
                     status = cursor.getString(statusIndex);
-                }
 
-                // Read new fields with safe column index checking
                 double ticketPrice = 0.0;
                 int priceIndex = cursor.getColumnIndex(COL_EVENT_TICKET_PRICE);
-                if (priceIndex != -1) {
+                if (priceIndex != -1)
                     ticketPrice = cursor.getDouble(priceIndex);
-                }
 
                 int ticketQuantity = 0;
                 int quantityIndex = cursor.getColumnIndex(COL_EVENT_TICKET_QUANTITY);
-                if (quantityIndex != -1) {
+                if (quantityIndex != -1)
                     ticketQuantity = cursor.getInt(quantityIndex);
-                }
 
                 String coverImagePath = "";
                 int coverPathIndex = cursor.getColumnIndex(COL_EVENT_COVER_IMAGE_PATH);
@@ -341,26 +327,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 String eventType = "Other";
                 int typeIndex = cursor.getColumnIndex(COL_EVENT_TYPE);
-                if (typeIndex != -1 && cursor.getString(typeIndex) != null) {
+                if (typeIndex != -1 && cursor.getString(typeIndex) != null)
                     eventType = cursor.getString(typeIndex);
-                }
 
-                // Create event with comprehensive constructor
                 Event event = new Event(id, title, date, location, description,
-                        status, ticketPrice, ticketQuantity,
-                        coverImagePath, galleryPaths, eventType);
+                        status, ticketPrice, ticketQuantity, coverImagePath, galleryPaths, eventType);
                 eventList.add(event);
             } while (cursor.moveToNext());
         }
         cursor.close();
         return eventList;
-    } // --- Ticket Operations ---
+    }
 
+    // --- Ticket Operations ---
     public boolean registerTicket(int userId, int eventId, String uniqueCode) {
         return registerTicket(userId, eventId, uniqueCode, System.currentTimeMillis());
     }
 
-    // Overloaded method with timestamp
     public boolean registerTicket(int userId, int eventId, String uniqueCode, long timestamp) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -372,8 +355,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return res != -1;
     }
 
-    public List<com.example.eventhive.models.Ticket> getTicketsForUser(int userId) {
-        List<com.example.eventhive.models.Ticket> list = new ArrayList<>();
+    public boolean registerTicket(String userUid, int eventId, String uniqueCode) {
+        return registerTicket(userUid, eventId, uniqueCode, System.currentTimeMillis());
+    }
+
+    public boolean registerTicket(String userUid, int eventId, String uniqueCode, long timestamp) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_TICKET_USER_UID, userUid);
+        values.put(COL_TICKET_EVENT_ID, eventId);
+        values.put(COL_TICKET_CODE, uniqueCode);
+        values.put(COL_TICKET_TIMESTAMP, timestamp);
+        long res = db.insert(TABLE_TICKETS, null, values);
+        return res != -1;
+    }
+
+    public List<Ticket> getTicketsForUser(int userId) {
+        List<Ticket> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT t." + COL_TICKET_ID + ", t." + COL_TICKET_USER_ID + ", t." + COL_TICKET_EVENT_ID + ", t."
                 + COL_TICKET_CODE + ", t." + COL_TICKET_TIMESTAMP +
@@ -381,139 +379,61 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " FROM " + TABLE_TICKETS + " t " +
                 "JOIN " + TABLE_EVENTS + " e ON t." + COL_TICKET_EVENT_ID + " = e." + COL_EVENT_ID +
                 " WHERE t." + COL_TICKET_USER_ID + " = ?" +
-                " ORDER BY t." + COL_TICKET_TIMESTAMP + " DESC"; // Sort by newest first
+                " ORDER BY t." + COL_TICKET_TIMESTAMP + " DESC";
 
         Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
         if (cursor.moveToFirst()) {
             do {
-                // Read timestamp with safe column checking
                 long timestamp = 0;
                 int timestampIndex = cursor.getColumnIndex(COL_TICKET_TIMESTAMP);
-                if (timestampIndex != -1) {
+                if (timestampIndex != -1)
                     timestamp = cursor.getLong(timestampIndex);
-                }
 
-                list.add(new com.example.eventhive.models.Ticket(
-                        cursor.getInt(0), // ticket id
-                        cursor.getInt(1), // user id
-                        cursor.getInt(2), // event id
-                        cursor.getString(3), // code
-                        timestamp, // timestamp
-                        cursor.getString(5), // title (index 4 is timestamp, so event data starts at 5)
-                        cursor.getString(6), // date
-                        cursor.getString(7) // location
-                ));
+                list.add(new Ticket(
+                        String.valueOf(cursor.getInt(1)), // userId
+                        String.valueOf(cursor.getInt(2)), // eventId
+                        cursor.getString(3), // uniqueCode
+                        timestamp,
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7)));
             } while (cursor.moveToNext());
         }
         cursor.close();
         return list;
     }
 
-    // --- Notification Operations ---
-    /**
-     * Creates a new notification in the database.
-     * 
-     * @param notification The notification to create
-     * @return true if successful, false otherwise
-     */
-    public boolean createNotification(com.example.eventhive.models.Notification notification) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_NOTIF_TITLE, notification.getTitle());
-        values.put(COL_NOTIF_MESSAGE, notification.getMessage());
-        values.put(COL_NOTIF_TIMESTAMP, notification.getTimestamp());
-        values.put(COL_NOTIF_IS_READ, notification.isRead() ? 1 : 0);
-        values.put(COL_NOTIF_USER_ID, notification.getUserId());
-        values.put(COL_NOTIF_RELATED_EVENT_ID, notification.getRelatedEventId());
-
-        long result = db.insert(TABLE_NOTIFICATIONS, null, values);
-        return result != -1;
-    }
-
-    /**
-     * Gets all notifications for a specific user, sorted by newest first.
-     * 
-     * @param userId The user ID
-     * @return List of notifications
-     */
-    public List<com.example.eventhive.models.Notification> getNotificationsForUser(int userId) {
-        List<com.example.eventhive.models.Notification> list = new ArrayList<>();
+    public List<Ticket> getTicketsForUser(String userUid) {
+        List<Ticket> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT t." + COL_TICKET_ID + ", t." + COL_TICKET_USER_ID + ", t." + COL_TICKET_EVENT_ID + ", t."
+                + COL_TICKET_CODE + ", t." + COL_TICKET_TIMESTAMP +
+                ", e." + COL_EVENT_TITLE + ", e." + COL_EVENT_DATE + ", e." + COL_EVENT_LOCATION +
+                " FROM " + TABLE_TICKETS + " t " +
+                "JOIN " + TABLE_EVENTS + " e ON t." + COL_TICKET_EVENT_ID + " = e." + COL_EVENT_ID +
+                " WHERE t." + COL_TICKET_USER_UID + " = ?" +
+                " ORDER BY t." + COL_TICKET_TIMESTAMP + " DESC";
 
-        String query = "SELECT * FROM " + TABLE_NOTIFICATIONS +
-                " WHERE " + COL_NOTIF_USER_ID + " = ?" +
-                " ORDER BY " + COL_NOTIF_TIMESTAMP + " DESC"; // Newest first
-
-        Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
+        Cursor cursor = db.rawQuery(query, new String[] { userUid });
         if (cursor.moveToFirst()) {
             do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOTIF_TITLE));
-                String message = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOTIF_MESSAGE));
-                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COL_NOTIF_TIMESTAMP));
-                boolean isRead = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_IS_READ)) == 1;
-                int notifUserId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_USER_ID));
-                int relatedEventId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_NOTIF_RELATED_EVENT_ID));
+                long timestamp = 0;
+                int timestampIndex = cursor.getColumnIndex(COL_TICKET_TIMESTAMP);
+                if (timestampIndex != -1)
+                    timestamp = cursor.getLong(timestampIndex);
 
-                list.add(new com.example.eventhive.models.Notification(
-                        id, title, message, timestamp, isRead, notifUserId, relatedEventId));
+                list.add(new Ticket(
+                        String.valueOf(cursor.getInt(1)), // userId (int -> String)
+                        String.valueOf(cursor.getInt(2)), // eventId (int -> String)
+                        cursor.getString(3), // uniqueCode
+                        timestamp,
+                        cursor.getString(5), // title
+                        cursor.getString(6), // date
+                        cursor.getString(7))); // location
             } while (cursor.moveToNext());
         }
         cursor.close();
         return list;
     }
 
-    /**
-     * Marks a specific notification as read.
-     * 
-     * @param notificationId The notification ID
-     * @return true if successful, false otherwise
-     */
-    public boolean markNotificationAsRead(int notificationId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_NOTIF_IS_READ, 1); // 1 = true
-
-        int rows = db.update(TABLE_NOTIFICATIONS, values,
-                COL_NOTIF_ID + " = ?",
-                new String[] { String.valueOf(notificationId) });
-        return rows > 0;
-    }
-
-    /**
-     * Marks all notifications for a user as read.
-     * 
-     * @param userId The user ID
-     * @return true if successful, false otherwise
-     */
-    public boolean markAllNotificationsAsRead(int userId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_NOTIF_IS_READ, 1);
-
-        int rows = db.update(TABLE_NOTIFICATIONS, values,
-                COL_NOTIF_USER_ID + " = ?",
-                new String[] { String.valueOf(userId) });
-        return rows > 0;
-    }
-
-    /**
-     * Gets the count of unread notifications for a user.
-     * 
-     * @param userId The user ID
-     * @return Count of unread notifications
-     */
-    public int getUnreadNotificationCount(int userId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT COUNT(*) FROM " + TABLE_NOTIFICATIONS +
-                " WHERE " + COL_NOTIF_USER_ID + " = ? AND " + COL_NOTIF_IS_READ + " = 0";
-
-        Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(userId) });
-        int count = 0;
-        if (cursor.moveToFirst()) {
-            count = cursor.getInt(0);
-        }
-        cursor.close();
-        return count;
-    }
 }

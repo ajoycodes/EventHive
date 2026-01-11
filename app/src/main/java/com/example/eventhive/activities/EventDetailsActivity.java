@@ -184,7 +184,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     private void setupPurchaseButton() {
-        DatabaseHelper db = new DatabaseHelper(this);
+        // Remove DatabaseHelper, use Firestore
         SessionManager session = SessionManager.getInstance(this);
 
         btnPurchase.setOnClickListener(v -> {
@@ -218,26 +218,59 @@ public class EventDetailsActivity extends AppCompatActivity {
 
             // Generate unique ticket code
             String uniqueCode = "TICKET-" + System.currentTimeMillis() + "-" + (int) (Math.random() * 1000);
-            int userId = session.getUserId();
-            int eventId = event.getId();
+
+            // Use Firebase UID
+            String userUid = session.getUserUid();
+            // String eventId = String.valueOf(event.getId()); // Legacy ID
+            // Ideally we use firestoreId if available.
+            // Since we migrated loading to Firestore in UserDashboard, we *might* have
+            // firestoreId.
+            // But if coming from a place that loaded from SQLite (only possible if
+            // OrganizerEventsActivity assumes SQLite), might be missing.
+            // For now, let's use event ID if present, otherwise handle gracefully.
+            // Actually, best to use event.getFirestoreId() if it's set.
+            String eventId = event.getFirestoreId();
+            if (eventId == null || eventId.isEmpty()) {
+                // Fallback for transition period or mocked events
+                eventId = String.valueOf(event.getId());
+            }
+
             long timestamp = System.currentTimeMillis();
 
-            boolean success = db.registerTicket(userId, eventId, uniqueCode, timestamp);
-            if (success) {
-                // Create notification for successful ticket purchase
-                String notificationTitle = "Ticket Purchased";
-                String notificationMessage = "You successfully purchased a ticket for \"" + event.getTitle() + "\"";
-                com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
-                        notificationTitle, notificationMessage, userId, eventId);
-                db.createNotification(notification);
+            String eventTitle = event.getTitle();
+            String eventDate = event.getDate();
+            String eventLocation = event.getLocation();
 
-                Intent intent = new Intent(EventDetailsActivity.this, TicketConfirmationActivity.class);
-                intent.putExtra("TICKET_CODE", uniqueCode);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this, "Purchase Failed", Toast.LENGTH_SHORT).show();
-            }
+            // Prepare Map for Firestore
+            java.util.Map<String, Object> ticketMap = new java.util.HashMap<>();
+            ticketMap.put("userId", userUid);
+            ticketMap.put("eventId", eventId);
+            ticketMap.put("uniqueCode", uniqueCode);
+            ticketMap.put("purchaseTimestamp", timestamp);
+            ticketMap.put("eventTitle", eventTitle);
+            ticketMap.put("eventDate", eventDate);
+            ticketMap.put("eventLocation", eventLocation);
+
+            // Disable button
+            btnPurchase.setEnabled(false);
+            btnPurchase.setText("Purchasing...");
+
+            // Write to Firestore
+            com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore
+                    .getInstance();
+            db.collection("tickets")
+                    .add(ticketMap)
+                    .addOnSuccessListener(documentReference -> {
+                        Intent intent = new Intent(EventDetailsActivity.this, TicketConfirmationActivity.class);
+                        intent.putExtra("TICKET_CODE", uniqueCode);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Purchase Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        btnPurchase.setEnabled(true);
+                        btnPurchase.setText("Get Ticket");
+                    });
         });
     }
 }

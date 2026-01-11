@@ -57,28 +57,60 @@ public class MyTicketsActivity extends AppCompatActivity {
 
     private void loadTickets() {
         try {
-            int userId = session.getUserId();
-            List<Ticket> tickets = dbHelper.getTicketsForUser(userId);
+            String userUid = session.getUserUid();
 
-            if (tickets == null || tickets.isEmpty()) {
-                if (ticketRecyclerView != null) {
-                    ticketRecyclerView.setVisibility(View.GONE);
-                }
-                if (tvEmptyState != null) {
-                    tvEmptyState.setVisibility(View.VISIBLE);
-                }
-            } else {
-                if (ticketRecyclerView != null) {
-                    ticketRecyclerView.setVisibility(View.VISIBLE);
-                }
-                if (tvEmptyState != null) {
-                    tvEmptyState.setVisibility(View.GONE);
-                }
-                adapter = new TicketAdapter(tickets);
-                if (ticketRecyclerView != null) {
-                    ticketRecyclerView.setAdapter(adapter);
-                }
-            }
+            // Show loading if possible (ticketRecyclerView might handle it or just be empty
+            // first)
+            if (tvEmptyState != null)
+                tvEmptyState.setVisibility(View.GONE);
+            if (ticketRecyclerView != null)
+                ticketRecyclerView.setVisibility(View.GONE);
+
+            // Fetch from Firestore
+            com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore
+                    .getInstance();
+            db.collection("tickets")
+                    .whereEqualTo("userId", userUid)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            List<Ticket> tickets = new ArrayList<>();
+                            for (com.google.firebase.firestore.QueryDocumentSnapshot document : task.getResult()) {
+                                try {
+                                    Ticket ticket = document.toObject(Ticket.class);
+                                    ticket.setFirestoreId(document.getId());
+                                    tickets.add(ticket);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error parsing ticket: " + e.getMessage());
+                                }
+                            }
+
+                            // Update UI
+                            if (tickets.isEmpty()) {
+                                if (ticketRecyclerView != null)
+                                    ticketRecyclerView.setVisibility(View.GONE);
+                                if (tvEmptyState != null)
+                                    tvEmptyState.setVisibility(View.VISIBLE);
+                            } else {
+                                if (ticketRecyclerView != null)
+                                    ticketRecyclerView.setVisibility(View.VISIBLE);
+                                if (tvEmptyState != null)
+                                    tvEmptyState.setVisibility(View.GONE);
+
+                                adapter = new TicketAdapter(tickets);
+                                if (ticketRecyclerView != null) {
+                                    ticketRecyclerView.setAdapter(adapter);
+                                }
+                            }
+
+                        } else {
+                            Log.e(TAG, "Error getting tickets: ", task.getException());
+                            Toast.makeText(MyTicketsActivity.this, "Failed to load tickets", Toast.LENGTH_SHORT).show();
+                            if (tvEmptyState != null)
+                                tvEmptyState.setVisibility(View.VISIBLE);
+                        }
+                    });
+
         } catch (Exception e) {
             Log.e(TAG, "Error loading tickets: " + e.getMessage(), e);
             Toast.makeText(this, "Error loading tickets", Toast.LENGTH_SHORT).show();

@@ -144,11 +144,13 @@ public class AuthManager {
                     if (documentSnapshot.exists()) {
                         String role = documentSnapshot.getString("role");
                         String firstName = documentSnapshot.getString("firstName");
+                        String email = documentSnapshot.getString("email");
                         String phone = documentSnapshot.getString("phone");
 
                         if (role != null && firstName != null) {
                             Log.d(TAG, "User role fetched: " + role);
-                            callback.onRoleFetched(role, firstName, phone != null ? phone : "");
+                            callback.onRoleFetched(role, firstName, email != null ? email : "",
+                                    phone != null ? phone : "");
                         } else {
                             callback.onFailure("User profile incomplete");
                         }

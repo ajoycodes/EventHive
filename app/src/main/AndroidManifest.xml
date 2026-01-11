@@ -43,6 +43,8 @@
         <activity android:name=".activities.AboutActivity" />
         <activity android:name=".activities.HelpActivity" />
         <activity android:name=".activities.AdminUserListActivity" />
+        <activity android:name=".activities.EditProfileActivity" />
+
         
     </application>
 

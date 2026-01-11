@@ -91,7 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                 new com.example.eventhive.auth.AuthCallback() {
                     @Override
                     public void onSuccess(String uid) {
-                        sessionManager.createLoginSession(uid, role, firstName, phone);
+                        sessionManager.createLoginSession(uid, role, firstName, email, phone);
                         setLoading(false);
                         Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                         navigateToDashboard(role);

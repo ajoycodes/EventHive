@@ -41,24 +41,12 @@ public class SessionManager {
      * @param name  User's first name
      * @param phone User's phone number
      */
-    public void createLoginSession(String uid, String role, String name, String phone) {
+    public void createLoginSession(String uid, String role, String name, String email, String phone) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putString(KEY_USER_UID, uid);
         editor.putString(KEY_USER_ROLE, role);
         editor.putString(KEY_USER_NAME, name);
-        editor.putString(KEY_USER_PHONE, phone != null ? phone : "");
-        editor.apply();
-    }
-
-    /**
-     * Full session creation with all parameters
-     */
-    public void createLoginSession(String uid, String name, String email, String role, String phone) {
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_USER_UID, uid);
-        editor.putString(KEY_USER_NAME, name);
-        editor.putString(KEY_USER_EMAIL, email);
-        editor.putString(KEY_USER_ROLE, role);
+        editor.putString(KEY_USER_EMAIL, email != null ? email : "");
         editor.putString(KEY_USER_PHONE, phone != null ? phone : "");
         editor.apply();
     }

@@ -232,16 +232,20 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
-        // Save cover image to internal storage
+        // Show loading state (simple approach: disable button)
+        btnCreate.setEnabled(false);
+        btnCreate.setText("Creating...");
+
+        // Save cover image to internal storage (Note: In a real production app, this
+        // should go to Firebase Storage)
+        // For this simple student version, we keep using local paths but store the PATH
+        // string in Firestore
+        // This means images only work on the specific device that created them.
         if (selectedCoverImageUri != null) {
             coverImagePath = ImageStorageHelper.saveImageToInternalStorage(this, selectedCoverImageUri);
-            if (coverImagePath == null) {
-                Toast.makeText(this, "Failed to save cover image", Toast.LENGTH_SHORT).show();
-                return;
-            }
         }
 
-        // Save gallery images to internal storage
+        // Save gallery images
         galleryImagePaths.clear();
         for (Uri uri : galleryImageUris) {
             String path = ImageStorageHelper.saveImageToInternalStorage(this, uri);
@@ -249,31 +253,48 @@ public class CreateEventActivity extends AppCompatActivity {
                 galleryImagePaths.add(path);
             }
         }
-
-        // Convert gallery paths list to comma-separated string
         String galleryPathsString = String.join(",", galleryImagePaths);
 
-        // Create Event object with all fields
-        Event newEvent = new Event(title, date, location, description,
-                Event.STATUS_ACTIVE, ticketPrice, ticketQuantity,
-                coverImagePath, galleryPathsString, eventType);
-
-        boolean success = dbHelper.createEvent(newEvent);
-
-        if (success) {
-            // Create notification for successful event creation
-            SessionManager session = SessionManager.getInstance(this);
-            int userId = session.getUserId();
-            String notificationTitle = "Event Created";
-            String notificationMessage = "You successfully created the event \"" + title + "\"";
-            com.example.eventhive.models.Notification notification = new com.example.eventhive.models.Notification(
-                    notificationTitle, notificationMessage, userId, 0); // 0 as event ID will be assigned by DB
-            dbHelper.createNotification(notification);
-
-            Toast.makeText(this, "Event Created Successfully!", Toast.LENGTH_SHORT).show();
-            finish(); // Go back to previous screen
-        } else {
-            Toast.makeText(this, "Failed to create event", Toast.LENGTH_SHORT).show();
+        // Prepare Firestore Map
+        com.google.firebase.auth.FirebaseAuth auth = com.google.firebase.auth.FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "You must be logged in!", Toast.LENGTH_SHORT).show();
+            btnCreate.setEnabled(true);
+            btnCreate.setText("Create Event");
+            return;
         }
+
+        String organizerId = auth.getCurrentUser().getUid();
+        long timestamp = System.currentTimeMillis();
+
+        java.util.Map<String, Object> eventMap = new java.util.HashMap<>();
+        eventMap.put("title", title);
+        eventMap.put("date", date);
+        eventMap.put("location", location);
+        eventMap.put("description", description);
+        eventMap.put("status", Event.STATUS_ACTIVE);
+        eventMap.put("ticketPrice", ticketPrice);
+        eventMap.put("ticketQuantity", ticketQuantity);
+        eventMap.put("coverImagePath", coverImagePath);
+        eventMap.put("galleryImagePaths", galleryPathsString);
+        eventMap.put("eventType", eventType);
+        eventMap.put("organizerId", organizerId);
+        eventMap.put("createdAt", timestamp);
+
+        // Write to Firestore
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore
+                .getInstance();
+        db.collection("events")
+                .add(eventMap)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(CreateEventActivity.this, "Event Created Successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CreateEvent", "Error adding event", e);
+                    Toast.makeText(CreateEventActivity.this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    btnCreate.setEnabled(true);
+                    btnCreate.setText("Create Event");
+                });
     }
 }

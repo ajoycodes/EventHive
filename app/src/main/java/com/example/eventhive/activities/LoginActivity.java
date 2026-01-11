@@ -88,8 +88,9 @@ public class LoginActivity extends AppCompatActivity {
     private void fetchUserRole(String uid) {
         authManager.getUserRole(uid, new com.example.eventhive.auth.RoleCallback() {
             @Override
-            public void onRoleFetched(String role, String firstName, String phone) {
-                sessionManager.createLoginSession(uid, role, firstName, phone);
+            public void onRoleFetched(String role, String firstName, String email, String phone) {
+                // Pass email to session manager
+                sessionManager.createLoginSession(uid, role, firstName, email, phone);
                 setLoading(false);
                 navigateToDashboard();
             }

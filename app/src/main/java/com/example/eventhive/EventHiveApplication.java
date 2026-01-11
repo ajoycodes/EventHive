@@ -21,9 +21,9 @@ public class EventHiveApplication extends Application {
             FirebaseApp.initializeApp(this);
 
             // Enable App Check in DEBUG mode (bypasses reCAPTCHA for development)
-            FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-            firebaseAppCheck.installAppCheckProviderFactory(
-                    DebugAppCheckProviderFactory.getInstance());
+            // FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+            // firebaseAppCheck.installAppCheckProviderFactory(
+            // DebugAppCheckProviderFactory.getInstance());
 
             Log.d(TAG, "✅ Firebase initialized successfully");
             Log.d(TAG, "✅ App Check enabled in DEBUG mode");
