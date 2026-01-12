@@ -88,25 +88,40 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     }
 
     private void loadStatistics() {
-        List<Event> allEvents = dbHelper.getAllEvents();
-        int totalEvents = allEvents != null ? allEvents.size() : 0;
-
-        // Count only active events
-        int activeEvents = 0;
-        if (allEvents != null) {
-            for (Event event : allEvents) {
-                if (Event.STATUS_ACTIVE.equals(event.getStatus())) {
-                    activeEvents++;
-                }
-            }
+        if (authManager.getCurrentUser() == null) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
         }
 
-        if (tvTotalEvents != null) {
-            tvTotalEvents.setText(String.valueOf(totalEvents));
-        }
-        if (tvActiveEvents != null) {
-            tvActiveEvents.setText(String.valueOf(activeEvents));
-        }
+        String uid = authManager.getCurrentUser().getUid();
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore
+                .getInstance();
+
+        db.collection("events")
+                .whereEqualTo("organizerId", uid)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int totalEvents = queryDocumentSnapshots.size();
+                    int activeEvents = 0;
+
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        String status = doc.getString("status");
+                        if (Event.STATUS_ACTIVE.equalsIgnoreCase(status)) {
+                            activeEvents++;
+                        }
+                    }
+
+                    if (tvTotalEvents != null) {
+                        tvTotalEvents.setText(String.valueOf(totalEvents));
+                    }
+                    if (tvActiveEvents != null) {
+                        tvActiveEvents.setText(String.valueOf(activeEvents));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("OrganizerDashboard", "Error loading stats", e);
+                });
     }
 
     @Override

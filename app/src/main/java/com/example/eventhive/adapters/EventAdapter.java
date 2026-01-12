@@ -97,15 +97,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.tvStatus.setText(status);
 
         // Set status badge color based on status
+        // Set status badge color based on status
         int statusBgColor;
         if (Event.STATUS_ACTIVE.equals(status)) {
             statusBgColor = context.getResources().getColor(R.color.brand_primary, null);
+            holder.itemView.setAlpha(1.0f); // Full opacity
         } else if (Event.STATUS_HOLD.equals(status)) {
             statusBgColor = context.getResources().getColor(android.R.color.holo_orange_dark, null);
+            holder.itemView.setAlpha(1.0f); // Full opacity
         } else if (Event.STATUS_CANCELLED.equals(status)) {
             statusBgColor = context.getResources().getColor(R.color.destructive, null);
+            holder.itemView.setAlpha(0.6f); // Dimmed for cancelled
         } else {
             statusBgColor = context.getResources().getColor(R.color.brand_primary, null);
+            holder.itemView.setAlpha(1.0f);
         }
         holder.tvStatus.setBackgroundColor(statusBgColor);
 

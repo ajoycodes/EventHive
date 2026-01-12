@@ -145,26 +145,26 @@ public class OrganizerEventsActivity extends AppCompatActivity {
             // Handle status change
             holder.spinnerStatus.post(() -> {
                 holder.spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    boolean isInitializing = true;
-
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                        if (isInitializing) {
-                            isInitializing = false;
-                            return;
-                        }
                         String newStatus = statusOptions[pos];
-                        if (!newStatus.equals(event.getStatus())) {
+                        // Only update if status actually changed
+                        if (event.getStatus() != null && !event.getStatus().equals(newStatus)) {
                             if (event.getFirestoreId() != null) {
                                 db.collection("events").document(event.getFirestoreId())
                                         .update("status", newStatus)
                                         .addOnSuccessListener(aVoid -> {
                                             event.setStatus(newStatus);
-                                            Toast.makeText(OrganizerEventsActivity.this, "Status updated",
+                                            Toast.makeText(OrganizerEventsActivity.this,
+                                                    "Status updated to " + newStatus,
                                                     Toast.LENGTH_SHORT).show();
+                                            // Refresh stats if we were locally tracking them
                                         })
-                                        .addOnFailureListener(e -> Toast.makeText(OrganizerEventsActivity.this,
-                                                "Update failed", Toast.LENGTH_SHORT).show());
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(OrganizerEventsActivity.this,
+                                                    "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            // Revert spinner if failed (optional, but good UX)
+                                        });
                             }
                         }
                     }
